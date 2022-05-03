@@ -1,23 +1,20 @@
 ﻿#include <string>
-
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
 #include <GL/freeglut.h>
-#endif
 
 #include "algorithms.h"
 
 namespace Algorithms
 {
-    Algorithm::Algorithm(std::string name) : _name(name)
+    Algorithm::Algorithm(const std::string &name) : _name(name)
     {
     }
 
-    const std::string Algorithm::getName() const
+    std::string Algorithm::getName() const
     {
         return this->_name;
     }
+
+    Algorithm::~Algorithm() = default;
 
     MidPointAlgorithm::MidPointAlgorithm() : Algorithm("midpoint")
     {
@@ -29,9 +26,11 @@ namespace Algorithms
 
     void MidPointAlgorithm::apply()
     {
+        //TODO
     }
 
     void AntiAliasingAlgorithm::apply()
     {
+        //TODO
     }
 }

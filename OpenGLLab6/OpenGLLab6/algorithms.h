@@ -5,10 +5,10 @@ namespace Algorithms
     class Algorithm
     {
     public:
-        Algorithm(std::string name);
-        const std::string getName() const;
+        explicit Algorithm(const std::string &name);
+        std::string getName() const;
         virtual void apply() = 0;
-
+        virtual ~Algorithm();
     private:
         const std::string _name;
     };
@@ -17,13 +17,13 @@ namespace Algorithms
     {
     public:
         MidPointAlgorithm();
-        virtual void apply() override;
+        void apply() override;
     };
 
     class AntiAliasingAlgorithm final : public Algorithm
     {
     public:
         AntiAliasingAlgorithm();
-        virtual void apply() override;
+        void apply() override;
     };
 }

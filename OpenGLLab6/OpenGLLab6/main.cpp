@@ -10,8 +10,8 @@
 
 #define GET_SIGN(NUM) std::signbit(NUM) ? -1 : 1
 
-#define ALGORITHM_MENU_NAME "Algorithm"
-#define GRID_SIZE_MENU_NAME "Grid Size"
+constexpr char ALGORITHM_MENU_NAME[] = "Algorithm";
+constexpr char GRID_SIZE_MENU_NAME[] = "Grid Size";
 
 constexpr float GRID_LINE_WIDTH = 1.5f;
 constexpr float LINE_WIDTH = 1.8f;
@@ -56,7 +56,7 @@ std::pair<double, double> startPoint;
 std::pair<double, double> endPoint;
 
 // Algorithm menu options
-std::vector<Algorithms::Algorithm *> algorithms;
+std::vector<std::unique_ptr<Algorithms::Algorithm>> algorithms;
 // Grid size menu options
 const std::array<int, 5> GRID_SIZES = {10, 15, 20, 25, 30};
 
@@ -67,26 +67,17 @@ const std::array<GLfloat, 4> LIGHT_POSITION = {0.f, 25.0f, 20.0f, 0.0f};
 
 void initializeAlgorithms()
 {
-    Algorithms::Algorithm *tmp = new Algorithms::MidPointAlgorithm();
-    algorithms.push_back(tmp);
-    tmp = new Algorithms::AntiAliasingAlgorithm();
-    algorithms.push_back(tmp);
-}
-
-void freeAlgorithms()
-{
-    for (const auto &algorithm : algorithms)
-    {
-        delete &algorithm;
-    }
-    std::cout << "Done!" << std::endl;
+    auto midpoint = std::make_unique<Algorithms::MidPointAlgorithm>();
+    algorithms.push_back(std::move(midpoint));
+    auto antiAliasing = std::make_unique<Algorithms::AntiAliasingAlgorithm>();
+    algorithms.push_back(std::move(antiAliasing));
 }
 
 int main(int argc, char **argv)
 {
     initializeAlgorithms();
     isDragging = false;
-    selectedAlgorithm = algorithms.front();
+    selectedAlgorithm = algorithms.front().get();
     gridSize = GRID_SIZES.front();
 
     glutInit(&argc, argv);
@@ -102,7 +93,6 @@ int main(int argc, char **argv)
     glutDisplayFunc(renderScene);
     glutMouseFunc(handleMouseOnClick);
     glutPassiveMotionFunc(handleMouseOnMove);
-    glutCloseFunc(freeAlgorithms);
 
     glutMainLoop(); // http://www.programmer-club.com.tw/ShowSameTitleN/opengl/2288.html
     return 0;
@@ -132,7 +122,9 @@ void handleMouseOnClick(int button, int state, int x, int y)
         case GLUT_DOWN:
             handleMouseOnLeftClickDown(x, y);
             break;
-        };
+        default:
+            break;
+        }
     }
 
     glutPostRedisplay();
@@ -141,8 +133,8 @@ void handleMouseOnClick(int button, int state, int x, int y)
 void handleAlgorithmMenuOnSelect(int index)
 {
     clearState();
-    selectedAlgorithm = algorithms[index];
-    std::cout << "Change to use " << algorithms[index]->getName() << " algorithm" << std::endl;
+    selectedAlgorithm = algorithms[index].get();
+    std::cout << "Change to use " << selectedAlgorithm->getName() << " algorithm" << std::endl;
     glutPostRedisplay();
 }
 
@@ -271,9 +263,10 @@ void handleMouseOnLeftClickDown(int x, int y)
 void buildPopupMenu()
 {
     const int algorithmMenu = glutCreateMenu(handleAlgorithmMenuOnSelect);
-    for (size_t i = 0; i < algorithms.size(); i++)
+    int counter = 0;
+    for (size_t i = 0; i < algorithms.size(); i++, counter++)
     {
-        glutAddMenuEntry(algorithms[i]->getName().c_str(), i);
+        glutAddMenuEntry(algorithms[i]->getName().c_str(), counter);
     }
 
     const int gridSizeMenu = glutCreateMenu(handleGridSizeMenuOnSelect);

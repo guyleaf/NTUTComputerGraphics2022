@@ -1,4 +1,4 @@
-standard := c++11
+standard := c++14
 objs := main.o algorithms.o
 exe := main
 

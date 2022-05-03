@@ -87,5 +87,6 @@
         "stop_token": "cpp",
         "cinttypes": "cpp",
         "__functional_03": "cpp"
-    }
+    },
+    "C_Cpp.default.cppStandard": "c++14"
 }

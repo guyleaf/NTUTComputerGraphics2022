@@ -1,5 +1,5 @@
 standard := c++14
-objs := main.o algorithms.o
+objs := main.o Algorithms/Algorithm.o Algorithms/AntiAliasingAlgorithm.o Algorithms/MidPointAlgorithm.o
 exe := main
 
 all: $(objs)

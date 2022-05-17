@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutInitWindowPosition(600, 80);
-    glutCreateWindow("Rasterizing Lines");
+    glutCreateWindow("Rasterizing Polygons");
 
     buildPopupMenu();
     setUpRC();
@@ -266,12 +266,15 @@ void drawGrid()
     glLineWidth(GRID_LINE_WIDTH);
     glBegin(GL_LINES);
     const double boundary = getGridBoundary();
-    for (double i = -boundary; i <= boundary; i++)
+    double i = -boundary;
+
+    while (i <= boundary)
     {
         glVertex2d(-boundary, i);
         glVertex2d(boundary, i);
         glVertex2d(i, boundary);
         glVertex2d(i, -boundary);
+        i++;
     }
     glEnd();
 }

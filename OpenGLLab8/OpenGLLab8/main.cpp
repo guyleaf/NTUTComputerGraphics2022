@@ -6,28 +6,28 @@
 #include <string>
 #include <GL/freeglut.h>
 
-#define X .525731112119133606f
-#define Z .850650808352039932f
+#define X .525731112119133606
+#define Z .850650808352039932
 
 
 int depth;
 double thetaX, thetaY;
-int polygonMode;
 
 
-constexpr int WINDOW_WIDTH = 800;
-constexpr int WINDOW_HEIGHT = 600;
+constexpr int WINDOW_WIDTH = 900;
+constexpr int WINDOW_HEIGHT = 300;
+constexpr double CLIP_SIZE = 1.0;
 
 constexpr double ANGLES_FOR_ROTATION = 1.0;
 
 
-const GLfloat vdata[12][3] = {
+const double vdata[12][3] = {
     {-X, 0.0, Z}, {X, 0.0, Z}, {-X, 0.0, -Z}, {X, 0.0, -Z},
     {0.0, Z, X}, {0.0, Z, -X}, {0.0, -Z, X}, {0.0, -Z, -X},
     {Z, X, 0.0}, {-Z, X, 0.0}, {Z, -X, 0.0}, {-Z, -X, 0.0}
 };
 
-const GLuint tindices[20][3] = {
+const int tindices[20][3] = {
     {1,4,0}, {4,9,0}, {4,9,5}, {8,5,4}, {1,8,4},
     {1,10,8}, {10,3,8}, {8,3,5}, {3,2,5}, {3,7,2},
     {3,10,7}, {10,6,7}, {6,11,7}, {6,0,11}, {6,1,0},
@@ -47,18 +47,17 @@ void handleMenuOnSelect(int);
 void drawFirstSphere();
 void drawSecondSphere();
 void drawThirdSphere();
-void subdivide(GLfloat[], GLfloat[], GLfloat[], int);
+void subdivide(double[], double[], double[], int);
 void rotate();
 
-void normalize(float[]);
+void normalize(double[]);
 void icoNormVec(int);
 
 
 int main(int argc, char** argv)
 {
     thetaX = thetaY = 0.0;
-    depth = 10;
-    polygonMode = 0;
+    depth = 1;
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
@@ -83,7 +82,7 @@ int main(int argc, char** argv)
 /// </summary>
 void renderScene()
 {
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -121,7 +120,7 @@ void handleKeyboardEvent(unsigned char key, int, int)
     {
         depth--;
     }
-    else if (key == '+')
+    else if (key == '=')
     {
         depth++;
     }
@@ -143,16 +142,16 @@ void handleSpecialKeyEvent(int key, int, int)
         break;
         // y ¥¿¥­²¾
     case GLUT_KEY_UP:
-        thetaY += ANGLES_FOR_ROTATION;
+        thetaY -= ANGLES_FOR_ROTATION;
         break;
         // y ­t¥­²¾
     case GLUT_KEY_DOWN:
-        thetaY -= ANGLES_FOR_ROTATION;
+        thetaY += ANGLES_FOR_ROTATION;
         break;
     default:
         break;
     }
-    
+
     glutPostRedisplay();
 }
 
@@ -162,17 +161,17 @@ void handleSpecialKeyEvent(int key, int, int)
 void setUpRC()
 {
     // Setup and enable light 0
-    GLfloat light_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
-    GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
-    GLfloat light_specular[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat light_ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    GLfloat light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_specular[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_specular);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 
-    GLfloat mat_specular[] = { 0.0, 0.0, 0.0, 1.0 };
-    GLfloat mat_diffuse[] = { 0.8, 0.6, 0.4, 1.0 };
-    GLfloat mat_ambient[] = { 0.8, 0.6, 0.4, 1.0 };
-    GLfloat mat_shininess = { 20.0 };
+    GLfloat mat_specular[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    GLfloat mat_diffuse[] = { 0.8f, 0.6f, 0.4f, 1.0f };
+    GLfloat mat_ambient[] = { 0.8f, 0.6f, 0.4f, 1.0f };
+    GLfloat mat_shininess = 20.0f;
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
     glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
@@ -181,14 +180,28 @@ void setUpRC()
     glShadeModel(GL_SMOOTH); /*enable smooth shading */
     glEnable(GL_LIGHTING); /* enable lighting */
     glEnable(GL_LIGHT0); /* enable light 0 */
+    glEnable(GL_DEPTH_TEST);
 }
 
 void changeSize(int w, int h)
 {
+    // Set the viewport to be the entire window
     glViewport(0, 0, w, h);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(-2.0, 2.0, -2.0, 2.0, -5.0, 10.0);
+
+    double clip_size = CLIP_SIZE;
+    if (w <= h)
+    {
+        clip_size = clip_size * (double)h / (double)w;
+        glOrtho(-CLIP_SIZE, CLIP_SIZE, -clip_size, clip_size, -10.0, 10.0);
+    }
+    else
+    {
+        clip_size = clip_size * (double)w / (double)h;
+        glOrtho(-clip_size, clip_size, -CLIP_SIZE, CLIP_SIZE, -10.0, 10.0);
+    }
 }
 
 /// <summary>
@@ -208,7 +221,7 @@ void buildPopupMenu()
 
 void handleMenuOnSelect(int option)
 {
-    polygonMode = option;
+    glPolygonMode(GL_FRONT_AND_BACK, option == 0 ? GL_LINE : GL_FILL);
     std::cout << "Change polygon mode to " << POLYGON_MODES[option] << std::endl;
     glutPostRedisplay();
 }
@@ -219,9 +232,9 @@ void drawFirstSphere()
     for (int i = 0; i < 20; i++)
     {
         icoNormVec(i);
-        glVertex3fv(vdata[tindices[i][0]]);
-        glVertex3fv(vdata[tindices[i][1]]);
-        glVertex3fv(vdata[tindices[i][2]]);
+        glVertex3dv(vdata[tindices[i][0]]);
+        glVertex3dv(vdata[tindices[i][1]]);
+        glVertex3dv(vdata[tindices[i][2]]);
     }
     glEnd();
 }
@@ -231,20 +244,19 @@ void drawSecondSphere()
     glBegin(GL_TRIANGLES);
     for (int i = 0; i < 20; i++)
     {
-        glNormal3fv(vdata[tindices[i][0]]);
-        glVertex3fv(vdata[tindices[i][0]]);
-        glNormal3fv(vdata[tindices[i][1]]);
-        glVertex3fv(vdata[tindices[i][1]]);
-        glNormal3fv(vdata[tindices[i][2]]);
-        glVertex3fv(vdata[tindices[i][2]]);
+        glNormal3dv(vdata[tindices[i][0]]);
+        glVertex3dv(vdata[tindices[i][0]]);
+        glNormal3dv(vdata[tindices[i][1]]);
+        glVertex3dv(vdata[tindices[i][1]]);
+        glNormal3dv(vdata[tindices[i][2]]);
+        glVertex3dv(vdata[tindices[i][2]]);
     }
     glEnd();
 }
 
 void drawThirdSphere()
 {
-    GLfloat vertex1[3], vertex2[3], vertex3[3];
-
+    double vertex1[3], vertex2[3], vertex3[3];
     for (int i = 0; i < 20; i++)
     {
         std::copy(std::begin(vdata[tindices[i][0]]), std::end(vdata[tindices[i][0]]), std::begin(vertex1));
@@ -256,15 +268,16 @@ void drawThirdSphere()
     glFlush();
 }
 
-void subdivide(GLfloat v1[3], GLfloat v2[3], GLfloat v3[3], int depth)
+void subdivide(double v1[3], double v2[3], double v3[3], int depth)
 {
-    GLfloat v12[3], v23[3], v31[3];
+    double v12[3], v23[3], v31[3];
 
     if (depth <= 0) {
-        glBegin(GL_TRIANGLES); //Draw if no further subdivision requested
-        glVertex3fv(v1);
-        glVertex3fv(v2);
-        glVertex3fv(v3);
+        glBegin(GL_TRIANGLES);
+        // Draw if no further subdivision requested
+        glVertex3dv(v1);
+        glVertex3dv(v2);
+        glVertex3dv(v3);
         glEnd();
         return;
     }
@@ -292,13 +305,13 @@ void rotate()
 }
 
 
-void normalize(float v[])
+void normalize(double v[])
 {
-    GLfloat d = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    double d = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
     v[0] /= d; v[1] /= d; v[2] /= d;
 }
 
-void normCrossProd(float u[], float v[], float out[])
+void normCrossProd(double u[], double v[], double out[])
 {
     out[0] = u[1] * v[2] - u[2] * v[1];
     out[1] = u[2] * v[0] - u[0] * v[2];
@@ -308,12 +321,12 @@ void normCrossProd(float u[], float v[], float out[])
 
 void icoNormVec(int i)
 {
-    GLfloat d1[3], d2[3], n[3];
+    double d1[3], d2[3], n[3];
 
     for (int k = 0; k < 3; k++) {
         d1[k] = vdata[tindices[i][0]][k] - vdata[tindices[i][1]][k];
         d2[k] = vdata[tindices[i][1]][k] - vdata[tindices[i][2]][k];
     }
     normCrossProd(d1, d2, n);
-    glNormal3fv(n);
+    glNormal3dv(n);
 }

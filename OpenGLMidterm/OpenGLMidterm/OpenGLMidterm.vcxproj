@@ -155,12 +155,14 @@
     <ClCompile Include="Algorithms\AntiAliasingAlgorithm.cpp" />
     <ClCompile Include="Algorithms\MidPointAlgorithm.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Algorithms.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -10,8 +10,13 @@
 
 namespace Algorithms
 {
-    MidPointAlgorithm::MidPointAlgorithm(const Callback& setPixel) : Algorithm("midpoint", setPixel)
+    MidPointAlgorithm::MidPointAlgorithm(const Callback& setPixel) : _setPixel(setPixel)
     {
+    }
+
+    std::string MidPointAlgorithm::getName() const
+    {
+        return _name;
     }
 
     void MidPointAlgorithm::rasterizeLineInPositiveSlope(const std::pair<int, int>& startPoint, const std::pair<int, int>& endPoint, const int& dx, const int& dy, const bool& isSlopeBiggerThanOne) const
@@ -136,7 +141,7 @@ namespace Algorithms
     {
         std::pair<int, int> _startPoint = startPoint;
         std::pair<int, int> _endPoint = endPoint;
-        this->sortPoints(_startPoint, _endPoint);
+        this->sortPointsByX(_startPoint, _endPoint);
 
         const int dx = _endPoint.first - _startPoint.first;
         const int dy = _endPoint.second - _startPoint.second;

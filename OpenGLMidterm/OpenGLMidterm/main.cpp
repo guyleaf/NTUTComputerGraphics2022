@@ -8,11 +8,13 @@
 #include <utility>
 #include <GL/freeglut.h>
 
-#include "Algorithms.h"
+#include "Algorithms/LineAlgorithm.h"
+#include "Algorithms/Line/AntiAliasingAlgorithm.h"
+#include "Algorithms/Line/MidPointAlgorithm.h"
 
 #define GET_SIGN(NUM) std::signbit(NUM) ? -1 : 1
 
-constexpr char ALGORITHM_MENU_NAME[] = "Algorithm";
+constexpr char ALGORITHM_MENU_NAME[] = "LineAlgorithm";
 constexpr char GRID_SIZE_MENU_NAME[] = "Grid Size";
 
 constexpr float GRID_LINE_WIDTH = 1.5f;
@@ -49,7 +51,7 @@ int roundToInt(const double& value);
 
 // Shared variables
 // 目前選擇的演算法
-Algorithms::Algorithm *selectedAlgorithm;
+Algorithms::LineAlgorithm *selectedAlgorithm;
 int gridSize;
 // 滑鼠點選了那些座標點
 std::vector<std::pair<double, double>> selectedPoints;
@@ -62,8 +64,8 @@ std::pair<double, double> startMousePoint;
 // 紀錄滑鼠按下的終點
 std::pair<double, double> endMousePoint;
 
-// Algorithm menu options
-std::vector<std::unique_ptr<Algorithms::Algorithm>> algorithms;
+// LineAlgorithm menu options
+std::vector<std::unique_ptr<Algorithms::LineAlgorithm>> algorithms;
 // Grid size menu options
 const std::array<int, 5> GRID_SIZES = {10, 15, 20, 25, 30};
 
@@ -191,7 +193,7 @@ void handleKeyboardEvent(unsigned char key, int, int)
 }
 
 /// <summary>
-/// 選單 - 處理選擇 Algorithm 時的選擇事件
+/// 選單 - 處理選擇 LineAlgorithm 時的選擇事件
 /// </summary>
 /// <param name="index"></param>
 void handleAlgorithmMenuOnSelect(int index)

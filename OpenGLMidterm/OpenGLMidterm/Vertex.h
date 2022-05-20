@@ -7,7 +7,8 @@ namespace Vertex
 	class Vertex
 	{
 	public:
-		explicit Vertex(const double&, const double&, const double& = 0.0, const double& = 0.0, const double& = 0.0);
+		explicit Vertex(const double&, const double&);
+		explicit Vertex(const double&, const double&, const double&, const double&, const double&);
 
 		double getX() const;
 		void setX(const double&);

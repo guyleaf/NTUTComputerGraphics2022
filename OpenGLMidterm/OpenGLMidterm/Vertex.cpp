@@ -4,7 +4,12 @@
 
 namespace Vertex
 {
-	Vertex::Vertex(const double& x, const double& y, const double& r = 0.0, const double& g = 0.0, const double& b = 0.0)
+	Vertex::Vertex(const double& x, const double& y)
+		: _coordinate(std::make_pair(x, y)), _color{ 0.0, 0.0, 0.0 }
+	{
+	}
+
+	Vertex::Vertex(const double& x, const double& y, const double& r, const double& g, const double& b)
 		: _coordinate(std::make_pair(x, y)), _color{r, g, b}
 	{
 	}

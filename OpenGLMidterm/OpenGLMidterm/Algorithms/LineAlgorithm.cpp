@@ -2,12 +2,14 @@
 #include <cmath>
 #include <string>
 
-#include "../Algorithms.h"
+#include "./LineAlgorithm.h"
 
 
 namespace Algorithms
 {
-    void Algorithm::sortPointsByX(std::pair<int, int>& startPoint, std::pair<int, int>& endPoint) const
+    LineAlgorithm::~LineAlgorithm() = default;
+
+    void LineAlgorithm::sortPointsByX(std::pair<int, int>& startPoint, std::pair<int, int>& endPoint) const
     {
         if (startPoint.first > endPoint.first || (startPoint.first == endPoint.first && startPoint.second > endPoint.second))
         {

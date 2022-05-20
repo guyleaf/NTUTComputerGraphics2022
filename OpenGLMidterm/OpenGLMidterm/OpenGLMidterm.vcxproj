@@ -151,9 +151,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Algorithms\Algorithm.cpp" />
-    <ClCompile Include="Algorithms\AntiAliasingAlgorithm.cpp" />
-    <ClCompile Include="Algorithms\MidPointAlgorithm.cpp" />
+    <ClCompile Include="Algorithms\LineAlgorithm.cpp" />
+    <ClCompile Include="Algorithms\Line\AntiAliasingAlgorithm.cpp" />
+    <ClCompile Include="Algorithms\Line\MidPointAlgorithm.cpp" />
+    <ClCompile Include="Algorithms\PolygonAlgorithm.cpp" />
+    <ClCompile Include="Algorithms\Polygon\ScanLineAlgorithm.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
@@ -161,7 +163,11 @@
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Algorithms.h" />
+    <ClInclude Include="Algorithms\LineAlgorithm.h" />
+    <ClInclude Include="Algorithms\Line\AntiAliasingAlgorithm.h" />
+    <ClInclude Include="Algorithms\Line\MidPointAlgorithm.h" />
+    <ClInclude Include="Algorithms\PolygonAlgorithm.h" />
+    <ClInclude Include="Algorithms\Polygon\ScanLineAlgorithm.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

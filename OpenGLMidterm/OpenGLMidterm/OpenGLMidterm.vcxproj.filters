@@ -13,33 +13,69 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="來源檔案\Rasterization Algorithms">
+      <UniqueIdentifier>{1426d24e-ff58-478a-95d9-e246aa31c856}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="來源檔案\Rasterization Algorithms\Line">
+      <UniqueIdentifier>{800c0401-4759-455c-8444-f8ae302f3763}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="來源檔案\Rasterization Algorithms\Polygon">
+      <UniqueIdentifier>{b8f451e1-c6eb-4fb6-97c8-9b9e390e5887}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Rasterization Algorithms">
+      <UniqueIdentifier>{5c6bcf14-eba8-4635-935f-4be05d97e650}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Rasterization Algorithms\Line">
+      <UniqueIdentifier>{bacb1fce-4e6b-4a6a-bd52-ff540ca58586}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Rasterization Algorithms\Polygon">
+      <UniqueIdentifier>{20ad8367-049f-434e-9f46-0a7009dfb320}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\Algorithm.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithms\AntiAliasingAlgorithm.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithms\MidPointAlgorithm.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
     <ClCompile Include="Vertex.cpp">
       <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\LineAlgorithm.cpp">
+      <Filter>來源檔案\Rasterization Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\PolygonAlgorithm.cpp">
+      <Filter>來源檔案\Rasterization Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\Polygon\ScanLineAlgorithm.cpp">
+      <Filter>來源檔案\Rasterization Algorithms\Polygon</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\Line\AntiAliasingAlgorithm.cpp">
+      <Filter>來源檔案\Rasterization Algorithms\Line</Filter>
+    </ClCompile>
+    <ClCompile Include="Algorithms\Line\MidPointAlgorithm.cpp">
+      <Filter>來源檔案\Rasterization Algorithms\Line</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Algorithms.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\Line\AntiAliasingAlgorithm.h">
+      <Filter>標頭檔\Rasterization Algorithms\Line</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\Line\MidPointAlgorithm.h">
+      <Filter>標頭檔\Rasterization Algorithms\Line</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\LineAlgorithm.h">
+      <Filter>標頭檔\Rasterization Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\PolygonAlgorithm.h">
+      <Filter>標頭檔\Rasterization Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Algorithms\Polygon\ScanLineAlgorithm.h">
+      <Filter>標頭檔\Rasterization Algorithms\Polygon</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

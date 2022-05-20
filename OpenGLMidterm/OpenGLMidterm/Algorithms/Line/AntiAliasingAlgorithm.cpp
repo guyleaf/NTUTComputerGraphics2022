@@ -4,7 +4,7 @@
 #include <climits>
 #include <GL/freeglut.h>
 
-#include "../Algorithms.h"
+#include "./AntiAliasingAlgorithm.h"
 
 namespace Algorithms
 {

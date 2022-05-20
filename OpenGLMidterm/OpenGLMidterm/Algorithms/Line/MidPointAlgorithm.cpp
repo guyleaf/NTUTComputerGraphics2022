@@ -6,7 +6,7 @@
 #include <functional>
 #include <GL/freeglut.h>
 
-#include "../Algorithms.h"
+#include "./MidPointAlgorithm.h"
 
 namespace Algorithms
 {

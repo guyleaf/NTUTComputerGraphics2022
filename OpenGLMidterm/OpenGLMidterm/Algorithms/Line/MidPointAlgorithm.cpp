@@ -7,10 +7,11 @@
 #include <GL/freeglut.h>
 
 #include "./MidPointAlgorithm.h"
+#include "../../Vertex.h"
 
 namespace Algorithms
 {
-    MidPointAlgorithm::MidPointAlgorithm(const Callback& setPixel) : _setPixel(setPixel)
+    MidPointAlgorithm::MidPointAlgorithm(const std::function<void(const Vertex::Vertex&)>& setPixel) : _setPixel(setPixel)
     {
     }
 
@@ -19,13 +20,12 @@ namespace Algorithms
         return _name;
     }
 
-    void MidPointAlgorithm::rasterizeLineInPositiveSlope(const std::pair<int, int>& startPoint, const std::pair<int, int>& endPoint, const int& dx, const int& dy, const bool& isSlopeBiggerThanOne) const
+    void MidPointAlgorithm::rasterizeLineInPositiveSlope(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, const double& dx, const double& dy) const
     {
-        const double alpha = 1.0;
-
-        int delE;
-        const int delNE = 2 * (dy - dx);
-        int d;
+        const bool isSlopeBiggerThanOne = std::abs(dy) >= std::abs(dx);
+        const double delNE = 2 * (dy - dx);
+        double delE;
+        double d;
 
         if (isSlopeBiggerThanOne)
         {
@@ -38,13 +38,15 @@ namespace Algorithms
             d = delE - dx;
         }
 
-        int x = startPoint.first;
-        int y = startPoint.second;
-        this->_setPixel(x, y, alpha);
+        double x = startVertex.getX();
+        double y = startVertex.getY();
+        this->_setPixel(Vertex::Vertex{ x, y, _color });
 
         if (isSlopeBiggerThanOne)
         {
-            while (y < endPoint.second)
+            const double endY = endVertex.getY();
+
+            while (y < endY)
             {
                 if (d > 0)
                 {
@@ -56,12 +58,14 @@ namespace Algorithms
                     x++;
                 }
                 y++;
-                this->_setPixel(x, y, alpha);
+                this->_setPixel(Vertex::Vertex{ x, y, _color });
             }
         }
         else
         {
-            while (x < endPoint.first)
+            const double endX = endVertex.getX();
+
+            while (x < endX)
             {
                 if (d <= 0)
                 {
@@ -73,18 +77,17 @@ namespace Algorithms
                     y++;
                 }
                 x++;
-                this->_setPixel(x, y, alpha);
+                this->_setPixel(Vertex::Vertex{ x, y, _color });
             }
         }
     }
 
-    void MidPointAlgorithm::rasterizeLineInNegativeSlope(const std::pair<int, int>& startPoint, const std::pair<int, int>& endPoint, const int& dx, const int& dy, const bool& isSlopeBiggerThanOne) const
+    void MidPointAlgorithm::rasterizeLineInNegativeSlope(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, const double& dx, const double& dy) const
     {
-        const double alpha = 1.0;
-
-        int delE;
-        const int delNE = 2 * (dy + dx);
-        int d;
+        const bool isSlopeBiggerThanOne = std::abs(dy) >= std::abs(dx);
+        const double delNE = 2 * (dy + dx);
+        double delE;
+        double d;
 
         if (isSlopeBiggerThanOne)
         {
@@ -97,13 +100,15 @@ namespace Algorithms
             d = delE + dx;
         }
 
-        int x = startPoint.first;
-        int y = startPoint.second;
-        this->_setPixel(x, y, alpha);
+        double x = startVertex.getX();
+        double y = startVertex.getY();
+        this->_setPixel(Vertex::Vertex{ x, y, _color });
 
         if (isSlopeBiggerThanOne)
         {
-            while (y > endPoint.second)
+            const double endY = endVertex.getY();
+
+            while (y > endY)
             {
                 if (d <= 0)
                 {
@@ -115,12 +120,14 @@ namespace Algorithms
                     x++;
                 }
                 y--;
-                this->_setPixel(x, y, alpha);
+                this->_setPixel(Vertex::Vertex{ x, y, _color });
             }
         }
         else
         {
-            while (x < endPoint.first)
+            const double endX = endVertex.getX();
+
+            while (x < endX)
             {
                 if (d > 0)
                 {
@@ -132,29 +139,27 @@ namespace Algorithms
                     y--;
                 }
                 x++;
-                this->_setPixel(x, y, alpha);
+                this->_setPixel(Vertex::Vertex{ x, y, _color });
             }
         }
     }
 
-    void MidPointAlgorithm::apply(const std::pair<int, int>& startPoint, const std::pair<int, int>& endPoint) const
+    void MidPointAlgorithm::apply(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex) const
     {
-        std::pair<int, int> _startPoint = startPoint;
-        std::pair<int, int> _endPoint = endPoint;
-        this->sortPointsByX(_startPoint, _endPoint);
+        const Vertex::Vertex *_startVertex = &startVertex;
+        const Vertex::Vertex *_endVertex = &endVertex;
+        this->sortPoints(&_startVertex, &_endVertex);
 
-        const int dx = _endPoint.first - _startPoint.first;
-        const int dy = _endPoint.second - _startPoint.second;
-        const bool isSlopeNegative = ((dy * dx) >> 31) & 0x1;
-        const int slope = dx != 0 ? dy / dx : INT_MAX;
+        const double dx = _endVertex->getX() - _startVertex->getX();
+        const double dy = _endVertex->getY() - _startVertex->getY();
 
-        if (isSlopeNegative)
+        if (std::signbit(dy * dx))
         {
-            this->rasterizeLineInNegativeSlope(_startPoint, _endPoint, dx, dy, slope);
+            this->rasterizeLineInNegativeSlope(*_startVertex, *_endVertex, dx, dy);
         }
         else
         {
-            this->rasterizeLineInPositiveSlope(_startPoint, _endPoint, dx, dy, slope);
+            this->rasterizeLineInPositiveSlope(*_startVertex, *_endVertex, dx, dy);
         }
     }
 }

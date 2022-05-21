@@ -1,11 +1,10 @@
 ﻿#pragma once
 #include <string>
-#include <functional>
+
+#include "../Vertex.h"
 
 namespace Algorithms
 {
-    using Callback = std::function<void(double, double, double)>;
-
     class LineAlgorithm
     {
     public:
@@ -22,9 +21,9 @@ namespace Algorithms
         /// </summary>
         /// <param name="startPoint"></param>
         /// <param name="endPoint"></param>
-        virtual void apply(const std::pair<int, int>& startPoint, const std::pair<int, int>& endPoint) const = 0;
+        virtual void apply(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex) const = 0;
     protected:
         // 排序座標
-        void sortPointsByX(std::pair<int, int>& startPoint, std::pair<int, int>& endPoint) const;
+        void sortPoints(const Vertex::Vertex** startVertex, const Vertex::Vertex** endVertex) const;
     };
 }

@@ -5,10 +5,11 @@
 #include <GL/freeglut.h>
 
 #include "./AntiAliasingAlgorithm.h"
+#include "../../Vertex.h"
 
 namespace Algorithms
 {
-    AntiAliasingAlgorithm::AntiAliasingAlgorithm(const Callback& setPixel) : _setPixel(setPixel)
+    AntiAliasingAlgorithm::AntiAliasingAlgorithm(const std::function<void(const Vertex::Vertex&)>& setPixel) : _setPixel(setPixel)
     {
     }
 
@@ -17,22 +18,23 @@ namespace Algorithms
         return _name;
     }
 
-    void AntiAliasingAlgorithm::rasterizeLineInPositiveSlope(const std::pair<int, int>& startPoint, const std::pair<int, int>& endPoint, const int& dx, const int& dy, const bool& isSlopeBiggerThanOne) const
+    void AntiAliasingAlgorithm::rasterizeLineInPositiveSlope(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, const double& slope) const
     {
-        const double slope = static_cast<double>(dy) / static_cast<double>(dx);
+        double x = startVertex.getX();
+        double y = startVertex.getY();
 
-        double x = startPoint.first;
-        double y = startPoint.second;
-
-        if (isSlopeBiggerThanOne)
+        // if the slope is bigger than 1
+        if (slope >= 1.0)
         {
-            while (y <= endPoint.second)
+            const double endY = endVertex.getY();
+
+            while (y <= endY)
             {
-                const double&& xi = static_cast<int>(std::floor(x));
+                const double&& xi = std::floor(x);
                 const double&& alpha = x - xi;
 
-                this->_setPixel(xi, y, 1.0 - alpha);
-                this->_setPixel(xi + 1.0, y, alpha);
+                this->_setPixel(Vertex::Vertex{ xi, y, 0.0, 0.0, 0.0, 1.0 - alpha });
+                this->_setPixel(Vertex::Vertex{ xi + 1.0, y, 0.0, 0.0, 0.0, alpha });
 
                 x += 1.0 / slope;
                 y++;
@@ -40,13 +42,15 @@ namespace Algorithms
         }
         else
         {
-            while (x <= endPoint.first)
+            const double endX = endVertex.getX();
+
+            while (x <= endX)
             {
-                const double&& yi = static_cast<int>(std::floor(y));
+                const double&& yi = std::floor(y);
                 const double&& alpha = y - yi;
 
-                this->_setPixel(x, yi, 1.0 - alpha);
-                this->_setPixel(x, yi + 1.0, alpha);
+                this->_setPixel(Vertex::Vertex{ x, yi, 0.0, 0.0, 0.0, 1.0 - alpha });
+                this->_setPixel(Vertex::Vertex{ x, yi + 1.0, 0.0, 0.0, 0.0, alpha });
 
                 y += slope;
                 x++;
@@ -54,22 +58,22 @@ namespace Algorithms
         }
     }
 
-    void AntiAliasingAlgorithm::rasterizeLineInNegativeSlope(const std::pair<int, int>& startPoint, const std::pair<int, int>& endPoint, const int& dx, const int& dy, const bool& isSlopeBiggerThanOne) const
+    void AntiAliasingAlgorithm::rasterizeLineInNegativeSlope(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, const double& slope) const
     {
-        const double slope = static_cast<double>(dy) / static_cast<double>(dx);
+        double x = startVertex.getX();
+        double y = startVertex.getY();
 
-        double x = startPoint.first;
-        double y = startPoint.second;
-
-        if (isSlopeBiggerThanOne)
+        if (slope <= -1.0)
         {
-            while (y >= endPoint.second)
+            const double endY = endVertex.getY();
+
+            while (y >= endY)
             {
-                const double&& xi = static_cast<int>(std::floor(x));
+                const double&& xi = std::floor(x);
                 const double&& alpha = x - xi;
 
-                this->_setPixel(xi, y, 1.0 - alpha);
-                this->_setPixel(xi + 1.0, y, alpha);
+                this->_setPixel(Vertex::Vertex{ xi, y, 0.0, 0.0, 0.0, 1.0 - alpha });
+                this->_setPixel(Vertex::Vertex{ xi + 1.0, y, 0.0, 0.0, 0.0, alpha });
 
                 x -= 1.0 / slope;
                 y--;
@@ -77,13 +81,15 @@ namespace Algorithms
         }
         else
         {
-            while (x <= endPoint.first)
+            const double endX = endVertex.getX();
+
+            while (x <= endX)
             {
-                const double&& yi = static_cast<int>(std::floor(y));
+                const double&& yi = std::floor(y);
                 const double&& alpha = y - yi;
 
-                this->_setPixel(x, yi, 1.0 - alpha);
-                this->_setPixel(x, yi + 1.0, alpha);
+                this->_setPixel(Vertex::Vertex{ x, yi, 0.0, 0.0, 0.0, 1.0 - alpha });
+                this->_setPixel(Vertex::Vertex{ x, yi + 1.0, 0.0, 0.0, 0.0, alpha });
 
                 y += slope;
                 x++;
@@ -91,24 +97,28 @@ namespace Algorithms
         }
     }
 
-    void AntiAliasingAlgorithm::apply(const std::pair<int, int>& startPoint, const std::pair<int, int>& endPoint) const
+    void AntiAliasingAlgorithm::apply(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex) const
     {
-        std::pair<int, int> _startPoint = startPoint;
-        std::pair<int, int> _endPoint = endPoint;
-        this->sortPointsByX(_startPoint, _endPoint);
+        const Vertex::Vertex* _startVertex = &startVertex;
+        const Vertex::Vertex* _endVertex = &endVertex;
+        this->sortPoints(&_startVertex, &_endVertex);
 
-        const int dx = _endPoint.first - _startPoint.first;
-        const int dy = _endPoint.second - _startPoint.second;
-        const bool isSlopeNegative = ((dy * dx) >> 31) & 0x1;
-        const int slope = dx != 0 ? dy / dx : INT_MAX;
+        const double dx = _endVertex->getX() - _startVertex->getX();
+        const double dy = _endVertex->getY() - _startVertex->getY();
 
-        if (isSlopeNegative)
+        double slope = dy >= 0.0 ? INT_MAX : INT_MIN;
+        if (dx != 0)
         {
-            this->rasterizeLineInNegativeSlope(_startPoint, _endPoint, dx, dy, slope);
+            slope = dy / dx;
+        }
+
+        if (std::signbit(slope))
+        {
+            this->rasterizeLineInNegativeSlope(*_startVertex, *_endVertex, slope);
         }
         else
         {
-            this->rasterizeLineInPositiveSlope(_startPoint, _endPoint, dx, dy, slope);
+            this->rasterizeLineInPositiveSlope(*_startVertex, *_endVertex, slope);
         }
     }
 }

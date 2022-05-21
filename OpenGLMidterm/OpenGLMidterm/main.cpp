@@ -8,7 +8,7 @@
 #include <utility>
 #include <GL/freeglut.h>
 
-#include "Algorithms/LineAlgorithm.h"
+#include "Vertex.h"
 #include "Algorithms/Line/AntiAliasingAlgorithm.h"
 #include "Algorithms/Line/MidPointAlgorithm.h"
 
@@ -23,8 +23,8 @@ constexpr float LINE_WIDTH = 1.8f;
 constexpr int WINDOW_WIDTH = 600;
 constexpr int WINDOW_HEIGHT = 600;
 
-constexpr double CELL_WIDTH = 1.0;
-constexpr double CELL_HALF_WIDTH = CELL_WIDTH / 2;
+constexpr double CELL_SIZE = 1.0;
+constexpr double CELL_HALF_SIZE = CELL_SIZE / 2;
 
 // precompile
 void changeSize(int, int);
@@ -47,7 +47,6 @@ double getGridBoundary();
 void clearState();
 std::pair<double, double> convertWindowCoordinateToWorldCoordinate(const int&, const int&);
 void printMouseMessage(const double&, const double&);
-int roundToInt(const double& value);
 
 // Shared variables
 // 目前選擇的演算法
@@ -80,17 +79,20 @@ const std::array<GLfloat, 4> LIGHT_POSITION = {0.f, 25.0f, 20.0f, 0.0f};
 void initializeAlgorithms()
 {
     // Lambda: 定義如何畫格子
-    Algorithms::Callback setPixel = [](double centerX, double centerY, double alpha)
+    auto setPixel = [](const Vertex::Vertex& centerVertex)
     {
+        const double centerX = centerVertex.getX();
+        const double centerY = centerVertex.getY();
+
+        const double topY = centerY + CELL_HALF_SIZE;
+        const double bottomY = centerY - CELL_HALF_SIZE;
+        const double leftX = centerX - CELL_HALF_SIZE;
+        const double rightX = centerX + CELL_HALF_SIZE;
+
         std::cout << "Drawing pixel (" << centerX << "," << centerY << ")" << std::endl;
 
-        glColor4d(0.5, 0.5, 0.5, alpha);
+        glColor4d(centerVertex.getRed(), centerVertex.getGreen(), centerVertex.getBlue(), centerVertex.getAlpha());
         glBegin(GL_QUADS);
-        const double&& topY = centerY + CELL_HALF_WIDTH;
-        const double&& bottomY = centerY - CELL_HALF_WIDTH;
-        const double&& leftX = centerX - CELL_HALF_WIDTH;
-        const double&& rightX = centerX + CELL_HALF_WIDTH;
-
         glVertex2d(leftX, topY);
         glVertex2d(rightX, topY);
         glVertex2d(rightX, bottomY);
@@ -226,11 +228,11 @@ void rasterizingLines()
     {
         auto secondIter = firstIter + 1;
 
-        auto startPoint = std::make_pair<int, int>(roundToInt(firstIter->first), roundToInt(firstIter->second));
-        auto endPoint = std::make_pair<int, int>(roundToInt(secondIter->first), roundToInt(secondIter->second));
+        auto startVertex = Vertex::Vertex(std::round(firstIter->first), std::round(firstIter->second));
+        auto endVertex = Vertex::Vertex(std::round(secondIter->first), std::round(secondIter->second));
 
         // 使用此演算法
-        selectedAlgorithm->apply(startPoint, endPoint);
+        selectedAlgorithm->apply(startVertex, endVertex);
     }
 }
 
@@ -400,7 +402,7 @@ void changeSize(int w, int h)
 /// <returns>單邊 Grid 大小</returns>
 double getGridBoundary()
 {
-    return static_cast<double>(gridSize) + CELL_HALF_WIDTH;
+    return static_cast<double>(gridSize) + CELL_HALF_SIZE;
 }
 
 /// <summary>
@@ -434,14 +436,4 @@ std::pair<double, double> convertWindowCoordinateToWorldCoordinate(const int& x,
 void printMouseMessage(const double& x, const double& y)
 {
     std::cout << "Mouse click: (" << x << "," << y << ")" << std::endl;
-}
-
-/// <summary>
-/// 四捨五入並轉型成 int
-/// </summary>
-/// <param name="value"></param>
-/// <returns></returns>
-int roundToInt(const double& value)
-{
-    return static_cast<int>(std::round(value));
 }

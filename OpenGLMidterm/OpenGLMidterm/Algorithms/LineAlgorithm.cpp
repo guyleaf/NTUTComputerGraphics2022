@@ -3,17 +3,23 @@
 #include <string>
 
 #include "./LineAlgorithm.h"
+#include "../Vertex.h"
 
 
 namespace Algorithms
 {
     LineAlgorithm::~LineAlgorithm() = default;
 
-    void LineAlgorithm::sortPointsByX(std::pair<int, int>& startPoint, std::pair<int, int>& endPoint) const
+    void LineAlgorithm::sortPoints(const Vertex::Vertex **startVertex, const Vertex::Vertex **endVertex) const
     {
-        if (startPoint.first > endPoint.first || (startPoint.first == endPoint.first && startPoint.second > endPoint.second))
+        const double startX = (*startVertex)->getX();
+        const double startY = (*startVertex)->getY();
+        const double endX = (*endVertex)->getX();
+        const double endY = (*endVertex)->getY();
+
+        if (startX > endX || (startX == endX && startY > endY))
         {
-            std::swap(startPoint, endPoint);
+            std::swap(*startVertex, *endVertex);
         }
     }
 }

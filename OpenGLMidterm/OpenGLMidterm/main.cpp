@@ -9,8 +9,10 @@
 #include <GL/freeglut.h>
 
 #include "Vertex.h"
+#include "Polygon.h"
 #include "Algorithms/Line/AntiAliasingAlgorithm.h"
 #include "Algorithms/Line/MidPointAlgorithm.h"
+#include "Algorithms/Polygon/ScanLineAlgorithm.h"
 
 #define GET_SIGN(NUM) std::signbit(NUM) ? -1 : 1
 
@@ -45,23 +47,25 @@ void rasterizingLines();
 
 double getGridBoundary();
 void clearState();
-std::pair<double, double> convertWindowCoordinateToWorldCoordinate(const int&, const int&);
+Vertex::Vertex convertWindowCoordinateToWorldCoordinate(const int&, const int&);
 void printMouseMessage(const double&, const double&);
 
 // Shared variables
 // 目前選擇的演算法
 Algorithms::LineAlgorithm *selectedAlgorithm;
 int gridSize;
-// 滑鼠點選了那些座標點
-std::vector<std::pair<double, double>> selectedPoints;
 
-bool isDragging;
+// 儲存圖形
+std::vector<Polygon::Polygon> polygons;
+// 滑鼠點選了那些座標點
+std::vector<Vertex::Vertex> selectedPoints;
+
+bool isDrawing;
 double mouseX;
 double mouseY;
-// 紀錄滑鼠按下的起始點
-std::pair<double, double> startMousePoint;
-// 紀錄滑鼠按下的終點
-std::pair<double, double> endMousePoint;
+
+// 紀錄滑鼠按下的位置
+Vertex::Vertex mousePoint;
 
 // LineAlgorithm menu options
 std::vector<std::unique_ptr<Algorithms::LineAlgorithm>> algorithms;
@@ -89,7 +93,7 @@ void initializeAlgorithms()
         const double leftX = centerX - CELL_HALF_SIZE;
         const double rightX = centerX + CELL_HALF_SIZE;
 
-        std::cout << "Drawing pixel (" << centerX << "," << centerY << ")" << std::endl;
+        // std::cout << "Drawing pixel (" << centerX << "," << centerY << ")" << std::endl;
 
         glColor4d(centerVertex.getRed(), centerVertex.getGreen(), centerVertex.getBlue(), centerVertex.getAlpha());
         glBegin(GL_QUADS);
@@ -111,7 +115,7 @@ int main(int argc, char **argv)
     std::cout << sizeof(std::size_t) << std::endl;
 
     initializeAlgorithms();
-    isDragging = false;
+    isDrawing = false;
     selectedAlgorithm = algorithms.front().get();
     gridSize = GRID_SIZES.front();
 
@@ -141,11 +145,11 @@ int main(int argc, char **argv)
 /// <param name="y"></param>
 void handleMouseMotionEvent(int x, int y)
 {
-    if (isDragging)
+    if (isDrawing)
     {
         const auto point = convertWindowCoordinateToWorldCoordinate(x, y);
-        mouseX = point.first;
-        mouseY = point.second;
+        mouseX = point.getX();
+        mouseY = point.getY();
 
         glutPostRedisplay();
     }
@@ -200,7 +204,7 @@ void handleKeyboardEvent(unsigned char key, int, int)
 /// <param name="index"></param>
 void handleAlgorithmMenuOnSelect(int index)
 {
-    isDragging = false;
+    isDrawing = false;
     // 利用多型選擇演算法並使用
     selectedAlgorithm = algorithms[index].get();
     std::cout << "Change to use " << selectedAlgorithm->getName() << " algorithm" << std::endl;
@@ -213,7 +217,7 @@ void handleAlgorithmMenuOnSelect(int index)
 /// <param name="size"></param>
 void handleGridSizeMenuOnSelect(int size)
 {
-    isDragging = false;
+    isDrawing = false;
     gridSize = size;
     std::cout << "Change grid size to " << size << std::endl;
     glutPostRedisplay();
@@ -224,15 +228,20 @@ void handleGridSizeMenuOnSelect(int size)
 /// </summary>
 void rasterizingLines()
 {
-    for (auto firstIter = selectedPoints.begin(); firstIter != selectedPoints.end(); firstIter += 2)
+    for (Polygon::Polygon polygon : polygons)
     {
-        auto secondIter = firstIter + 1;
+        const std::vector<Vertex::Vertex>& vertices = polygon.getVertices();
 
-        auto startVertex = Vertex::Vertex(std::round(firstIter->first), std::round(firstIter->second));
-        auto endVertex = Vertex::Vertex(std::round(secondIter->first), std::round(secondIter->second));
+        for (auto firstIter = vertices.begin(); firstIter != vertices.end(); firstIter += 2)
+        {
+            auto secondIter = firstIter + 1;
 
-        // 使用此演算法
-        selectedAlgorithm->apply(startVertex, endVertex);
+            auto startVertex = Vertex::Vertex(std::round(firstIter->getX()), std::round(firstIter->getY()));
+            auto endVertex = Vertex::Vertex(std::round(secondIter->getX()), std::round(secondIter->getY()));
+
+            // 使用此演算法
+            selectedAlgorithm->apply(startVertex, endVertex);
+        }
     }
 }
 
@@ -243,19 +252,25 @@ void drawLines()
 {
     glColor3d(0.0, 0.0, 1.0);
     glLineWidth(LINE_WIDTH);
-    glBegin(GL_LINES);
-    for (auto iter = selectedPoints.begin(); iter != selectedPoints.end(); iter += 2)
-    {
-        glVertex2d(iter->first, iter->second);
-        glVertex2d((iter + 1)->first, (iter + 1)->second);
-    }
-    glEnd();
 
-    if (isDragging)
+    for (Polygon::Polygon polygon : polygons)
+    {
+        glBegin(GL_LINES);
+        const std::vector<Vertex::Vertex>& vertices = polygon.getVertices();
+
+        for (auto iter = vertices.begin(); iter != vertices.end(); iter += 2)
+        {
+            glVertex2d(iter->getX(), iter->getY());
+            glVertex2d((iter + 1)->getX(), (iter + 1)->getY());
+        }
+        glEnd();
+    }
+
+    if (isDrawing)
     {
         glColor3d(1.0, 0.0, 0.0);
         glBegin(GL_LINES);
-        glVertex2d(startMousePoint.first, startMousePoint.second);
+        glVertex2d(startMousePoint.getX(), startMousePoint.getY());
         glVertex2d(mouseX, mouseY);
         glEnd();
     }
@@ -311,19 +326,19 @@ void renderScene()
 /// </summary>
 void handleMouseOnLeftClickUp()
 {
-    if (isDragging)
+    if (isDrawing)
     {
-        selectedPoints.push_back(startMousePoint);
-        selectedPoints.push_back(endMousePoint);
-        printMouseMessage(endMousePoint.first, endMousePoint.second);
-        isDragging = false;
+        selectedPoints.emplace_back(startMousePoint);
+        selectedPoints.emplace_back(endMousePoint);
+        printMouseMessage(endMousePoint.getX(), endMousePoint.getY());
+        isDrawing = false;
     }
     else
     {
-        mouseX = startMousePoint.first;
-        mouseY = startMousePoint.second;
+        mouseX = startMousePoint.getX();
+        mouseY = startMousePoint.getY();
         printMouseMessage(mouseX, mouseY);
-        isDragging = true;
+        isDrawing = true;
     }
 }
 
@@ -334,7 +349,7 @@ void handleMouseOnLeftClickUp()
 /// <param name="y"></param>
 void handleMouseOnLeftClickDown(int x, int y)
 {
-    if (isDragging)
+    if (isDrawing)
     {
         endMousePoint = convertWindowCoordinateToWorldCoordinate(x, y);
     }
@@ -410,7 +425,7 @@ double getGridBoundary()
 /// </summary>
 void clearState()
 {
-    isDragging = false;
+    isDrawing = false;
     selectedPoints.clear();
 }
 
@@ -420,12 +435,12 @@ void clearState()
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <returns></returns>
-std::pair<double, double> convertWindowCoordinateToWorldCoordinate(const int& x, const int& y)
+Vertex::Vertex convertWindowCoordinateToWorldCoordinate(const int& x, const int& y)
 {
     const double size = getGridBoundary();
     const double worldX = (2.0 * static_cast<double>(x) / WINDOW_WIDTH - 1.0) * size;
     const double worldY = (1.0 - 2.0 * static_cast<double>(y) / WINDOW_HEIGHT) * size;
-    return std::pair<double, double>(worldX, worldY);
+    return Vertex::Vertex(worldX, worldY);
 }
 
 /// <summary>

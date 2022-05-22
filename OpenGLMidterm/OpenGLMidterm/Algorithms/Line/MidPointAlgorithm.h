@@ -3,8 +3,8 @@
 #include <utility>
 #include <functional>
 
-#include "../LineAlgorithm.h"
 #include "../../Vertex.h"
+#include "../LineAlgorithm.h"
 
 namespace Algorithms
 {
@@ -26,10 +26,11 @@ namespace Algorithms
 
         // 畫格子
         const std::function<void(const Vertex::Vertex&)> _setPixel;
+
         // 演算法名稱
         const std::string _name{ "midpoint" };
 
-        // pixel color
-        std::array<double, 4> _color{ 0.5, 0.5, 0.5, 1.0 };
+        // default pixel color
+        const std::array<double, 4> _color{ 0.5, 0.5, 0.5, 1.0 };
     };
 }

@@ -1,15 +1,11 @@
 #define _USE_MATH_DEFINES
-#include <iostream>
 #include <cmath>
-#include <climits>
-#include <GL/freeglut.h>
 
-#include "./AntiAliasingAlgorithm.h"
-#include "../../Vertex.h"
+#include "AntiAliasingAlgorithm.h"
 
 namespace Algorithms
 {
-    AntiAliasingAlgorithm::AntiAliasingAlgorithm(const std::function<void(const Vertex::Vertex&)>& setPixel) : _setPixel(setPixel)
+    AntiAliasingAlgorithm::AntiAliasingAlgorithm(const std::function<void(const Vertex::Vertex&)>& setPixel) : _setPixel{ setPixel }
     {
     }
 
@@ -22,6 +18,7 @@ namespace Algorithms
     {
         double x = startVertex.getX();
         double y = startVertex.getY();
+        std::array<double, 4> color{ _color };
 
         // if the slope is bigger than 1
         if (slope >= 1.0)
@@ -33,8 +30,10 @@ namespace Algorithms
                 const double&& xi = std::floor(x);
                 const double&& alpha = x - xi;
 
-                this->_setPixel(Vertex::Vertex{ xi, y, 0.0, 0.0, 0.0, 1.0 - alpha });
-                this->_setPixel(Vertex::Vertex{ xi + 1.0, y, 0.0, 0.0, 0.0, alpha });
+                color[3] = alpha;
+                this->_setPixel(Vertex::Vertex{ xi + 1.0, y, color });
+                color[3] = 1.0 - alpha;
+                this->_setPixel(Vertex::Vertex{ xi, y, color });
 
                 x += 1.0 / slope;
                 y++;
@@ -49,8 +48,10 @@ namespace Algorithms
                 const double&& yi = std::floor(y);
                 const double&& alpha = y - yi;
 
-                this->_setPixel(Vertex::Vertex{ x, yi, 0.0, 0.0, 0.0, 1.0 - alpha });
-                this->_setPixel(Vertex::Vertex{ x, yi + 1.0, 0.0, 0.0, 0.0, alpha });
+                color[3] = alpha;
+                this->_setPixel(Vertex::Vertex{ x, yi + 1.0, color });
+                color[3] = 1.0 - alpha;
+                this->_setPixel(Vertex::Vertex{ x, yi, color });
 
                 y += slope;
                 x++;
@@ -62,6 +63,7 @@ namespace Algorithms
     {
         double x = startVertex.getX();
         double y = startVertex.getY();
+        std::array<double, 4> color{ _color };
 
         if (slope <= -1.0)
         {
@@ -72,8 +74,10 @@ namespace Algorithms
                 const double&& xi = std::floor(x);
                 const double&& alpha = x - xi;
 
-                this->_setPixel(Vertex::Vertex{ xi, y, 0.0, 0.0, 0.0, 1.0 - alpha });
-                this->_setPixel(Vertex::Vertex{ xi + 1.0, y, 0.0, 0.0, 0.0, alpha });
+                color[3] = alpha;
+                this->_setPixel(Vertex::Vertex{ xi + 1.0, y, color });
+                color[3] = 1 - alpha;
+                this->_setPixel(Vertex::Vertex{ xi, y, color });
 
                 x -= 1.0 / slope;
                 y--;
@@ -88,8 +92,10 @@ namespace Algorithms
                 const double&& yi = std::floor(y);
                 const double&& alpha = y - yi;
 
-                this->_setPixel(Vertex::Vertex{ x, yi, 0.0, 0.0, 0.0, 1.0 - alpha });
-                this->_setPixel(Vertex::Vertex{ x, yi + 1.0, 0.0, 0.0, 0.0, alpha });
+                color[3] = alpha;
+                this->_setPixel(Vertex::Vertex{ x, yi + 1.0, color });
+                color[3] = 1 - alpha;
+                this->_setPixel(Vertex::Vertex{ x, yi, color });
 
                 y += slope;
                 x++;

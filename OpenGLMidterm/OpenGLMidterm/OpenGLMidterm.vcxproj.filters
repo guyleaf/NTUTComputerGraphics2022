@@ -54,6 +54,9 @@
     <ClCompile Include="Algorithms\Line\MidPointAlgorithm.cpp">
       <Filter>來源檔案\Rasterization Algorithms\Line</Filter>
     </ClCompile>
+    <ClCompile Include="Polygon.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -76,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="Algorithms\Polygon\ScanLineAlgorithm.h">
       <Filter>標頭檔\Rasterization Algorithms\Polygon</Filter>
+    </ClInclude>
+    <ClInclude Include="Polygon.h">
+      <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

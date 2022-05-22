@@ -1,13 +1,12 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <functional>
 
 #include "../Vertex.h"
 
 namespace Algorithms
 {
-    using Callback = std::function<void(Vertex::Vertex)>;
-
     class PolygonAlgorithm
     {
     public:
@@ -22,8 +21,6 @@ namespace Algorithms
         /// <summary>
         /// 使用此演算法
         /// </summary>
-        /// <param name="startPoint"></param>
-        /// <param name="endPoint"></param>
-        virtual void apply(const std::pair<int, int>& startPoint, const std::pair<int, int>& endPoint) const = 0;
+        virtual void apply(const std::vector<Vertex::Vertex>& vertices) const = 0;
     };
 }

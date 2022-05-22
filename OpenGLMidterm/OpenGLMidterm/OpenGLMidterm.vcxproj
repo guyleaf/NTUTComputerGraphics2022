@@ -157,6 +157,7 @@
     <ClCompile Include="Algorithms\PolygonAlgorithm.cpp" />
     <ClCompile Include="Algorithms\Polygon\ScanLineAlgorithm.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +169,7 @@
     <ClInclude Include="Algorithms\Line\MidPointAlgorithm.h" />
     <ClInclude Include="Algorithms\PolygonAlgorithm.h" />
     <ClInclude Include="Algorithms\Polygon\ScanLineAlgorithm.h" />
+    <ClInclude Include="Polygon.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

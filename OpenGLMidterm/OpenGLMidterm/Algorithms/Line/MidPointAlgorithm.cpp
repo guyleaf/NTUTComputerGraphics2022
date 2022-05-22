@@ -1,17 +1,11 @@
 #define _USE_MATH_DEFINES
-#include <iostream>
 #include <cmath>
-#include <climits>
-#include <string>
-#include <functional>
-#include <GL/freeglut.h>
 
-#include "./MidPointAlgorithm.h"
-#include "../../Vertex.h"
+#include "MidPointAlgorithm.h"
 
 namespace Algorithms
 {
-    MidPointAlgorithm::MidPointAlgorithm(const std::function<void(const Vertex::Vertex&)>& setPixel) : _setPixel(setPixel)
+    MidPointAlgorithm::MidPointAlgorithm(const std::function<void(const Vertex::Vertex&)>& setPixel) : _setPixel{ setPixel }
     {
     }
 

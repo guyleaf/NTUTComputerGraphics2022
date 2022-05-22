@@ -7,9 +7,10 @@ namespace Vertex
 	class Vertex
 	{
 	public:
-		explicit Vertex(const double& x, const double& y);
-		explicit Vertex(const double& x, const double& y, const std::array<double, 4>& color);
-		explicit Vertex(const double& x, const double& y, const double& r, const double& g, const double& b, const double& a);
+		Vertex();
+		Vertex(double x, double y);
+		Vertex(double x, double y, const std::array<double, 4>& color);
+		Vertex(double x, double y, double r, double g, double b, double a);
 
 		double getX() const;
 		void setX(const double&);

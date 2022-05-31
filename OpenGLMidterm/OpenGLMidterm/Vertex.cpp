@@ -6,12 +6,12 @@
 namespace Vertex
 {
     Vertex::Vertex()
-        : _coordinate(std::make_pair(0.0, 0.0)), _color{ 0.0, 0.0, 0.0, 1.0 }
+        : _coordinate(std::make_pair(0.0, 0.0))
     {
     }
 
     Vertex::Vertex(double x, double y)
-        : _coordinate(std::make_pair(x, y)), _color{ 0.0, 0.0, 0.0, 1.0 }
+        : _coordinate(std::make_pair(x, y))
     {
     }
 
@@ -30,7 +30,7 @@ namespace Vertex
         return this->_coordinate.first;
     }
 
-    void Vertex::setX(const double& value)
+    void Vertex::setX(double value)
     {
         this->_coordinate.first = value;
     }
@@ -40,7 +40,7 @@ namespace Vertex
         return _coordinate.second;
     }
 
-    void Vertex::setY(const double& value)
+    void Vertex::setY(double value)
     {
         this->_coordinate.second = value;
     }
@@ -50,9 +50,9 @@ namespace Vertex
         return _color[0];
     }
 
-    void Vertex::setRed(const double& value)
+    void Vertex::setRed(double value)
     {
-        _color[0] = value;
+        this->_color[0] = value;
     }
 
     double Vertex::getGreen() const
@@ -60,9 +60,9 @@ namespace Vertex
         return _color[1];
     }
 
-    void Vertex::setGreen(const double& value)
+    void Vertex::setGreen(double value)
     {
-        _color[1] = value;
+        this->_color[1] = value;
     }
 
     double Vertex::getBlue() const
@@ -70,9 +70,9 @@ namespace Vertex
         return _color[2];
     }
 
-    void Vertex::setBlue(const double& value)
+    void Vertex::setBlue(double value)
     {
-        _color[2] = value;
+        this->_color[2] = value;
     }
 
     double Vertex::getAlpha() const
@@ -80,9 +80,9 @@ namespace Vertex
         return _color[3];
     }
 
-    void Vertex::setAlhpa(const double& value)
+    void Vertex::setAlhpa(double value)
     {
-        _color[3] = value;
+        this->_color[3] = value;
     }
 
     std::array<double, 4> Vertex::getRGBA() const
@@ -92,15 +92,12 @@ namespace Vertex
 
     void Vertex::setRGBA(const std::array<double, 4>& value)
     {
-        _color = value;
+        this->_color = value;
     }
 
     Vertex operator-(const Vertex& vertex)
     {
-        Vertex newVertex{ vertex };
-        newVertex._coordinate.first = -newVertex._coordinate.first;
-        newVertex._coordinate.second = -newVertex._coordinate.second;
-        return newVertex;
+        return { -vertex._coordinate.first, -vertex._coordinate.second };
     }
 
     Vertex operator+(const Vertex& rhl, const Vertex& rhs)
@@ -113,22 +110,22 @@ namespace Vertex
         return Vertex(rhl) -= rhs;
     }
 
-    Vertex operator*(const Vertex& rhl, const double& rhs)
+    Vertex operator*(const Vertex& rhl, const double rhs)
     {
         return Vertex(rhl) *= rhs;
     }
 
-    Vertex operator*(const double& rhl, const Vertex& rhs)
+    Vertex operator*(const double rhl, const Vertex& rhs)
     {
         return Vertex(rhs) *= rhl;
     }
 
-    Vertex operator/(const Vertex& rhl, const double& rhs)
+    Vertex operator/(const Vertex& rhl, const double rhs)
     {
         return Vertex(rhl) /= rhs;
     }
 
-    Vertex operator/(const double& rhl, const Vertex& rhs)
+    Vertex operator/(const double rhl, const Vertex& rhs)
     {
         return Vertex(rhs) *= (1.0 / rhl);
     }
@@ -149,7 +146,7 @@ namespace Vertex
         return *this;
     }
 
-    Vertex& Vertex::operator*=(const double& scalar)
+    Vertex& Vertex::operator*=(const double scalar)
     {
         this->_coordinate.first *= scalar;
         this->_coordinate.second *= scalar;
@@ -157,7 +154,7 @@ namespace Vertex
         return *this;
     }
 
-    Vertex& Vertex::operator/=(const double& scalar)
+    Vertex& Vertex::operator/=(const double scalar)
     {
         this->_coordinate.first /= scalar;
         this->_coordinate.second /= scalar;

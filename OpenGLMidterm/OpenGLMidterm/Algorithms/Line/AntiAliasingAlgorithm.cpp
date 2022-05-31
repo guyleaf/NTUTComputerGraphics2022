@@ -1,4 +1,3 @@
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 #include "AntiAliasingAlgorithm.h"
@@ -103,14 +102,13 @@ namespace Algorithms
         }
     }
 
-    void AntiAliasingAlgorithm::apply(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex) const
+    void AntiAliasingAlgorithm::apply(Vertex::Vertex startVertex, Vertex::Vertex endVertex) const
     {
-        const Vertex::Vertex* _startVertex = &startVertex;
-        const Vertex::Vertex* _endVertex = &endVertex;
-        this->sortPoints(&_startVertex, &_endVertex);
+        this->sortPoints(startVertex, endVertex);
+        this->roundPoints(startVertex, endVertex);
 
-        const double dx = _endVertex->getX() - _startVertex->getX();
-        const double dy = _endVertex->getY() - _startVertex->getY();
+        const double dx = endVertex.getX() - startVertex.getX();
+        const double dy = endVertex.getY() - startVertex.getY();
 
         double slope = dy >= 0.0 ? INT_MAX : INT_MIN;
         if (dx != 0)
@@ -120,11 +118,11 @@ namespace Algorithms
 
         if (std::signbit(slope))
         {
-            this->rasterizeLineInNegativeSlope(*_startVertex, *_endVertex, slope);
+            this->rasterizeLineInNegativeSlope(startVertex, endVertex, slope);
         }
         else
         {
-            this->rasterizeLineInPositiveSlope(*_startVertex, *_endVertex, slope);
+            this->rasterizeLineInPositiveSlope(startVertex, endVertex, slope);
         }
     }
 }

@@ -13,22 +13,22 @@ namespace Vertex
 		Vertex(double x, double y, double r, double g, double b, double a);
 
 		double getX() const;
-		void setX(const double&);
+		void setX(double);
 
 		double getY() const;
-		void setY(const double&);
+		void setY(double);
 
 		double getRed() const;
-		void setRed(const double&);
+		void setRed(double);
 
 		double getGreen() const;
-		void setGreen(const double&);
+		void setGreen(double);
 
 		double getBlue() const;
-		void setBlue(const double&);
+		void setBlue(double);
 
 		double getAlpha() const;
-		void setAlhpa(const double&);
+		void setAlhpa(double);
 
 		std::array<double, 4> getRGBA() const;
 		void setRGBA(const std::array<double, 4>&);
@@ -38,17 +38,17 @@ namespace Vertex
 		friend Vertex operator+(const Vertex&, const Vertex&);
 		friend Vertex operator-(const Vertex&, const Vertex&);
 
-		friend Vertex operator*(const Vertex&, const double&);
-		friend Vertex operator/(const Vertex&, const double&);
-		friend Vertex operator*(const double&, const Vertex&);
-		friend Vertex operator/(const double&, const Vertex&);
+		friend Vertex operator*(const Vertex&, const double);
+		friend Vertex operator/(const Vertex&, const double);
+		friend Vertex operator*(const double, const Vertex&);
+		friend Vertex operator/(const double, const Vertex&);
 
 		Vertex& operator+=(const Vertex& secondVertex);
 		Vertex& operator-=(const Vertex& secondVertex);
-		Vertex& operator*=(const double&);
-		Vertex& operator/=(const double&);
+		Vertex& operator*=(const double);
+		Vertex& operator/=(const double);
 	private:
 		std::pair<double, double> _coordinate;
-		std::array<double, 4> _color;
+		std::array<double, 4> _color{ 0.0, 0.0, 0.0, 1.0 };
 	};
 }

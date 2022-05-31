@@ -17,7 +17,7 @@ namespace Algorithms
         /// <summary>
         /// 使用此演算法
         /// </summary>
-        void apply(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex) const override;
+        void apply(Vertex::Vertex startVertex, Vertex::Vertex endVertex) const override;
     private:
         // 處理斜率為正的線段
         void rasterizeLineInPositiveSlope(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, const double& slope) const;

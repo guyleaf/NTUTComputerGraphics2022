@@ -21,9 +21,11 @@ namespace Algorithms
         /// </summary>
         /// <param name="startPoint"></param>
         /// <param name="endPoint"></param>
-        virtual void apply(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex) const = 0;
+        virtual void apply(Vertex::Vertex startVertex, Vertex::Vertex endVertex) const = 0;
     protected:
         // 排序座標
-        void sortPoints(const Vertex::Vertex** startVertex, const Vertex::Vertex** endVertex) const;
+        void sortPoints(Vertex::Vertex& startVertex, Vertex::Vertex& endVertex) const;
+        // 四捨五入座標
+        void roundPoints(Vertex::Vertex& startVertex, Vertex::Vertex& endVertex) const;
     };
 }

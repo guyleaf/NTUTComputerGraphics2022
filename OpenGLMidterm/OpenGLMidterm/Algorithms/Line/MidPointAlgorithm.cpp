@@ -1,4 +1,3 @@
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 #include "MidPointAlgorithm.h"
@@ -138,22 +137,21 @@ namespace Algorithms
         }
     }
 
-    void MidPointAlgorithm::apply(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex) const
+    void MidPointAlgorithm::apply(Vertex::Vertex startVertex, Vertex::Vertex endVertex) const
     {
-        const Vertex::Vertex *_startVertex = &startVertex;
-        const Vertex::Vertex *_endVertex = &endVertex;
-        this->sortPoints(&_startVertex, &_endVertex);
+        this->sortPoints(startVertex, endVertex);
+        this->roundPoints(startVertex, endVertex);
 
-        const double dx = _endVertex->getX() - _startVertex->getX();
-        const double dy = _endVertex->getY() - _startVertex->getY();
+        const double dx = endVertex.getX() - startVertex.getX();
+        const double dy = endVertex.getY() - startVertex.getY();
 
         if (std::signbit(dy * dx))
         {
-            this->rasterizeLineInNegativeSlope(*_startVertex, *_endVertex, dx, dy);
+            this->rasterizeLineInNegativeSlope(startVertex, endVertex, dx, dy);
         }
         else
         {
-            this->rasterizeLineInPositiveSlope(*_startVertex, *_endVertex, dx, dy);
+            this->rasterizeLineInPositiveSlope(startVertex, endVertex, dx, dy);
         }
     }
 }

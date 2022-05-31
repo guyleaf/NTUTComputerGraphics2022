@@ -14,9 +14,8 @@
 #include "Algorithms/Line/MidPointAlgorithm.h"
 #include "Algorithms/Polygon/ScanLineAlgorithm.h"
 
-#define GET_SIGN(NUM) std::signbit(NUM) ? -1 : 1
 
-constexpr char ALGORITHM_MENU_NAME[] = "LineAlgorithm";
+constexpr char RASTERIZATION_MODE_MENU_NAME[] = "Rasterization Mode";
 constexpr char GRID_SIZE_MENU_NAME[] = "Grid Size";
 
 constexpr float GRID_LINE_WIDTH = 1.5f;
@@ -37,22 +36,30 @@ void handleMouseOnLeftClickDown(int, int);
 void handleMouseEvent(int, int, int, int);
 void handleMouseMotionEvent(int, int);
 void handleKeyboardEvent(unsigned char, int, int);
-void handleAlgorithmMenuOnSelect(int);
+void handleRasterizationModeMenuOnSelect(int);
 void handleGridSizeMenuOnSelect(int);
 
 void setUpRC();
 void buildPopupMenu();
 void drawLines();
-void rasterizingLines();
+void rasterizeLines();
+void rasterizePolygons();
 
 double getGridBoundary();
 void clearState();
 Vertex::Vertex convertWindowCoordinateToWorldCoordinate(const int&, const int&);
 void printMouseMessage(const double&, const double&);
 
+enum class RasterizationMode
+{
+    Line,
+    Polygon
+};
+
 // Shared variables
-// 目前選擇的演算法
-Algorithms::LineAlgorithm *selectedAlgorithm;
+std::unique_ptr<Algorithms::LineAlgorithm> selectedLineAlgorithm;
+std::unique_ptr<Algorithms::PolygonAlgorithm> selectedPolygonAlgorithm;
+RasterizationMode mode;
 int gridSize;
 
 // 儲存圖形
@@ -67,8 +74,7 @@ double mouseY;
 // 紀錄滑鼠按下的位置
 Vertex::Vertex mousePoint;
 
-// LineAlgorithm menu options
-std::vector<std::unique_ptr<Algorithms::LineAlgorithm>> algorithms;
+const std::array<std::string, 2> RASTERIZATION_MODE_NAMES = { "Line", "Polygon" };
 // Grid size menu options
 const std::array<int, 5> GRID_SIZES = {10, 15, 20, 25, 30};
 
@@ -93,8 +99,6 @@ void initializeAlgorithms()
         const double leftX = centerX - CELL_HALF_SIZE;
         const double rightX = centerX + CELL_HALF_SIZE;
 
-        // std::cout << "Drawing pixel (" << centerX << "," << centerY << ")" << std::endl;
-
         glColor4d(centerVertex.getRed(), centerVertex.getGreen(), centerVertex.getBlue(), centerVertex.getAlpha());
         glBegin(GL_QUADS);
         glVertex2d(leftX, topY);
@@ -104,10 +108,8 @@ void initializeAlgorithms()
         glEnd();
     };
 
-    auto midpoint = std::make_unique<Algorithms::MidPointAlgorithm>(setPixel);
-    algorithms.push_back(std::move(midpoint));
-    auto antiAliasing = std::make_unique<Algorithms::AntiAliasingAlgorithm>(setPixel);
-    algorithms.push_back(std::move(antiAliasing));
+    selectedLineAlgorithm = std::make_unique<Algorithms::AntiAliasingAlgorithm>(setPixel);
+    selectedPolygonAlgorithm = std::make_unique<Algorithms::ScanLineAlgorithm>(setPixel);
 }
 
 int main(int argc, char **argv)
@@ -116,7 +118,6 @@ int main(int argc, char **argv)
 
     initializeAlgorithms();
     isDrawing = false;
-    selectedAlgorithm = algorithms.front().get();
     gridSize = GRID_SIZES.front();
 
     glutInit(&argc, argv);
@@ -202,12 +203,10 @@ void handleKeyboardEvent(unsigned char key, int, int)
 /// 選單 - 處理選擇 LineAlgorithm 時的選擇事件
 /// </summary>
 /// <param name="index"></param>
-void handleAlgorithmMenuOnSelect(int index)
+void handleRasterizationModeMenuOnSelect(int index)
 {
     isDrawing = false;
-    // 利用多型選擇演算法並使用
-    selectedAlgorithm = algorithms[index].get();
-    std::cout << "Change to use " << selectedAlgorithm->getName() << " algorithm" << std::endl;
+    mode = static_cast<RasterizationMode>(index);
     glutPostRedisplay();
 }
 
@@ -226,7 +225,7 @@ void handleGridSizeMenuOnSelect(int size)
 /// <summary>
 /// 依照所選得演算法進行光柵化
 /// </summary>
-void rasterizingLines()
+void rasterizeLines()
 {
     for (Polygon::Polygon polygon : polygons)
     {
@@ -234,14 +233,16 @@ void rasterizingLines()
 
         for (auto firstIter = vertices.begin(); firstIter != vertices.end(); firstIter += 2)
         {
-            auto secondIter = firstIter + 1;
-
-            auto startVertex = Vertex::Vertex(std::round(firstIter->getX()), std::round(firstIter->getY()));
-            auto endVertex = Vertex::Vertex(std::round(secondIter->getX()), std::round(secondIter->getY()));
-
-            // 使用此演算法
-            selectedAlgorithm->apply(startVertex, endVertex);
+            selectedLineAlgorithm->apply(*firstIter, *(firstIter + 1));
         }
+    }
+}
+
+void rasterizePolygons()
+{
+    for (Polygon::Polygon polygon : polygons)
+    {
+        selectedPolygonAlgorithm->apply(polygon.getVertices());
     }
 }
 
@@ -313,7 +314,18 @@ void renderScene()
     glLoadIdentity();
     gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
-    rasterizingLines();
+    switch (mode)
+    {
+    case RasterizationMode::Line:
+        rasterizeLines();
+        break;
+    case RasterizationMode::Polygon:
+        rasterizePolygons();
+        break;
+    default:
+        std::cout << "Unknown Rasterization mode" << std::endl;
+    }
+
     drawGrid();
     drawLines();
 
@@ -364,21 +376,22 @@ void handleMouseOnLeftClickDown(int x, int y)
 /// </summary>
 void buildPopupMenu()
 {
-    const int algorithmMenu = glutCreateMenu(handleAlgorithmMenuOnSelect);
+    const int raterizationModeMenu = glutCreateMenu(handleRasterizationModeMenuOnSelect);
     int counter = 0;
-    for (size_t i = 0; i < algorithms.size(); i++, counter++)
+    for (std::string name: RASTERIZATION_MODE_NAMES)
     {
-        glutAddMenuEntry(algorithms[i]->getName().c_str(), counter);
+        glutAddMenuEntry(name.c_str(), counter);
+        counter++;
     }
 
     const int gridSizeMenu = glutCreateMenu(handleGridSizeMenuOnSelect);
-    for (const int &size : GRID_SIZES)
+    for (int size : GRID_SIZES)
     {
         glutAddMenuEntry(std::to_string(size).c_str(), size);
     }
 
     glutCreateMenu(nullptr);
-    glutAddSubMenu(ALGORITHM_MENU_NAME, algorithmMenu);
+    glutAddSubMenu(RASTERIZATION_MODE_MENU_NAME, raterizationModeMenu);
     glutAddSubMenu(GRID_SIZE_MENU_NAME, gridSizeMenu);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }

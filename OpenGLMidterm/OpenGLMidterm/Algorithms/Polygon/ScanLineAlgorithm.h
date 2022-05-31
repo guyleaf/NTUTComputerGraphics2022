@@ -1,5 +1,6 @@
 #pragma once
 #include <functional>
+
 #include "../PolygonAlgorithm.h"
 
 namespace Algorithms

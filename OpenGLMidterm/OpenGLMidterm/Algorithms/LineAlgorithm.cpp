@@ -10,16 +10,24 @@ namespace Algorithms
 {
     LineAlgorithm::~LineAlgorithm() = default;
 
-    void LineAlgorithm::sortPoints(const Vertex::Vertex **startVertex, const Vertex::Vertex **endVertex) const
+    void LineAlgorithm::sortPoints(Vertex::Vertex& startVertex, Vertex::Vertex& endVertex) const
     {
-        const double startX = (*startVertex)->getX();
-        const double startY = (*startVertex)->getY();
-        const double endX = (*endVertex)->getX();
-        const double endY = (*endVertex)->getY();
+        const double startX = startVertex.getX();
+        const double startY = startVertex.getY();
+        const double endX = endVertex.getX();
+        const double endY = endVertex.getY();
 
         if (startX > endX || (startX == endX && startY > endY))
         {
-            std::swap(*startVertex, *endVertex);
+            std::swap(startVertex, endVertex);
         }
+    }
+
+    void LineAlgorithm::roundPoints(Vertex::Vertex& startVertex, Vertex::Vertex& endVertex) const
+    {
+        startVertex.setX(std::round(startVertex.getX()));
+        startVertex.setY(std::round(startVertex.getY()));
+        endVertex.setX(std::round(endVertex.getX()));
+        endVertex.setY(std::round(endVertex.getY()));
     }
 }

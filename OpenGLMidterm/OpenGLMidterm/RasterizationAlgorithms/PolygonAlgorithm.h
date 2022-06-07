@@ -3,9 +3,9 @@
 #include <vector>
 #include <functional>
 
-#include "../Vertex.h"
+#include "../Graph2D/Vertex.h"
 
-namespace Algorithms
+namespace RasterizationAlgorithms
 {
     class PolygonAlgorithm
     {
@@ -21,6 +21,6 @@ namespace Algorithms
         /// <summary>
         /// 使用此演算法
         /// </summary>
-        virtual void apply(const std::vector<Vertex::Vertex>& vertices) const = 0;
+        virtual void apply(const std::vector<Graph2D::Vertex>& vertices) const = 0;
     };
 }

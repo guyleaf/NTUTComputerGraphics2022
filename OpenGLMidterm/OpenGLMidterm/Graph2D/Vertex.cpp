@@ -3,7 +3,7 @@
 
 #include "Vertex.h"
 
-namespace Vertex
+namespace Graph2D
 {
     Vertex::Vertex()
         : _coordinate(std::make_pair(0.0, 0.0))
@@ -160,5 +160,10 @@ namespace Vertex
         this->_coordinate.second /= scalar;
 
         return *this;
+    }
+
+    bool operator==(const Vertex& lhs, const Vertex& rhs)
+    {
+        return lhs._coordinate == rhs._coordinate;
     }
 }

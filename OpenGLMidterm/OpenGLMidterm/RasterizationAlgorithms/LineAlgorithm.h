@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include <string>
 
-#include "../Vertex.h"
+#include "../Graph2D/Vertex.h"
 
-namespace Algorithms
+namespace RasterizationAlgorithms
 {
     class LineAlgorithm
     {
@@ -21,11 +21,11 @@ namespace Algorithms
         /// </summary>
         /// <param name="startPoint"></param>
         /// <param name="endPoint"></param>
-        virtual void apply(Vertex::Vertex startVertex, Vertex::Vertex endVertex) const = 0;
+        virtual void apply(Graph2D::Vertex startVertex, Graph2D::Vertex endVertex) const = 0;
     protected:
         // 排序座標
-        void sortPoints(Vertex::Vertex& startVertex, Vertex::Vertex& endVertex) const;
+        void sortPoints(Graph2D::Vertex& startVertex, Graph2D::Vertex& endVertex) const;
         // 四捨五入座標
-        void roundPoints(Vertex::Vertex& startVertex, Vertex::Vertex& endVertex) const;
+        void roundPoints(Graph2D::Vertex& startVertex, Graph2D::Vertex& endVertex) const;
     };
 }

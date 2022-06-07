@@ -1,6 +1,6 @@
 #include "PolygonAlgorithm.h"
 
-namespace Algorithms
+namespace RasterizationAlgorithms
 {
     PolygonAlgorithm::~PolygonAlgorithm() = default;
 }

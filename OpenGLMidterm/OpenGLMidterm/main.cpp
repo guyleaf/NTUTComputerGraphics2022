@@ -8,11 +8,8 @@
 #include <utility>
 #include <GL/freeglut.h>
 
-#include "Vertex.h"
-#include "Polygon.h"
-#include "Algorithms/Line/AntiAliasingAlgorithm.h"
-#include "Algorithms/Line/MidPointAlgorithm.h"
-#include "Algorithms/Polygon/ScanLineAlgorithm.h"
+#include "graph2d.h"
+#include "rasterizationAlgorithms.h"
 
 
 constexpr char RASTERIZATION_MODE_MENU_NAME[] = "Rasterization Mode";
@@ -31,8 +28,6 @@ constexpr double CELL_HALF_SIZE = CELL_SIZE / 2;
 void changeSize(int, int);
 void renderScene();
 
-void handleMouseOnLeftClickUp();
-void handleMouseOnLeftClickDown(int, int);
 void handleMouseEvent(int, int, int, int);
 void handleMouseMotionEvent(int, int);
 void handleKeyboardEvent(unsigned char, int, int);
@@ -45,9 +40,10 @@ void drawLines();
 void rasterizeLines();
 void rasterizePolygons();
 
+bool isDrawing();
+bool isInSameGridCell(const Graph2D::Vertex&, const Graph2D::Vertex&);
 double getGridBoundary();
-void clearState();
-Vertex::Vertex convertWindowCoordinateToWorldCoordinate(const int&, const int&);
+Graph2D::Vertex convertWindowCoordinateToWorldCoordinate(const int&, const int&);
 void printMouseMessage(const double&, const double&);
 
 enum class RasterizationMode
@@ -57,24 +53,21 @@ enum class RasterizationMode
 };
 
 // Shared variables
-std::unique_ptr<Algorithms::LineAlgorithm> selectedLineAlgorithm;
-std::unique_ptr<Algorithms::PolygonAlgorithm> selectedPolygonAlgorithm;
+std::unique_ptr<RasterizationAlgorithms::LineAlgorithm> selectedLineAlgorithm;
+std::unique_ptr<RasterizationAlgorithms::PolygonAlgorithm> selectedPolygonAlgorithm;
 RasterizationMode mode;
 int gridSize;
 
 // 儲存圖形
-std::vector<Polygon::Polygon> polygons;
+std::vector<Graph2D::Polygon> polygons;
 // 滑鼠點選了那些座標點
-std::vector<Vertex::Vertex> selectedPoints;
+std::vector<Graph2D::Vertex> selectedPoints;
 
-bool isDrawing;
 double mouseX;
 double mouseY;
 
-// 紀錄滑鼠按下的位置
-Vertex::Vertex mousePoint;
 
-const std::array<std::string, 2> RASTERIZATION_MODE_NAMES = { "Line", "Polygon" };
+const std::array<std::string, 2> RASTERIZATION_MODE_NAMES = { "Line", "Graph2D" };
 // Grid size menu options
 const std::array<int, 5> GRID_SIZES = {10, 15, 20, 25, 30};
 
@@ -89,7 +82,7 @@ const std::array<GLfloat, 4> LIGHT_POSITION = {0.f, 25.0f, 20.0f, 0.0f};
 void initializeAlgorithms()
 {
     // Lambda: 定義如何畫格子
-    auto setPixel = [](const Vertex::Vertex& centerVertex)
+    auto setPixel = [](const Graph2D::Vertex& centerVertex)
     {
         const double centerX = centerVertex.getX();
         const double centerY = centerVertex.getY();
@@ -108,8 +101,8 @@ void initializeAlgorithms()
         glEnd();
     };
 
-    selectedLineAlgorithm = std::make_unique<Algorithms::AntiAliasingAlgorithm>(setPixel);
-    selectedPolygonAlgorithm = std::make_unique<Algorithms::ScanLineAlgorithm>(setPixel);
+    selectedLineAlgorithm = std::make_unique<RasterizationAlgorithms::AntiAliasingAlgorithm>(setPixel);
+    selectedPolygonAlgorithm = std::make_unique<RasterizationAlgorithms::ScanLineAlgorithm>(setPixel);
 }
 
 int main(int argc, char **argv)
@@ -117,8 +110,8 @@ int main(int argc, char **argv)
     std::cout << sizeof(std::size_t) << std::endl;
 
     initializeAlgorithms();
-    isDrawing = false;
     gridSize = GRID_SIZES.front();
+    mode = RasterizationMode::Line;
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
@@ -146,12 +139,13 @@ int main(int argc, char **argv)
 /// <param name="y"></param>
 void handleMouseMotionEvent(int x, int y)
 {
-    if (isDrawing)
-    {
-        const auto point = convertWindowCoordinateToWorldCoordinate(x, y);
-        mouseX = point.getX();
-        mouseY = point.getY();
+    const auto point = convertWindowCoordinateToWorldCoordinate(x, y);
+    mouseX = point.getX();
+    mouseY = point.getY();
 
+    // while drawing polygon
+    if (isDrawing())
+    {
         glutPostRedisplay();
     }
 }
@@ -165,18 +159,19 @@ void handleMouseMotionEvent(int x, int y)
 /// <param name="y"></param>
 void handleMouseEvent(int button, int state, int x, int y)
 {
-    if (button == GLUT_LEFT_BUTTON)
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
     {
-        switch (state)
+        const auto point = convertWindowCoordinateToWorldCoordinate(x, y);
+
+        // Check if the point and the first selected point are in the same grid cell
+        if (isDrawing() && isInSameGridCell(point, selectedPoints.front()))
         {
-        case GLUT_UP:
-            handleMouseOnLeftClickUp();
-            break;
-        case GLUT_DOWN:
-            handleMouseOnLeftClickDown(x, y);
-            break;
-        default:
-            break;
+            polygons.emplace_back(selectedPoints);
+            selectedPoints.clear();
+        }
+        else
+        {
+            selectedPoints.push_back(point);
         }
 
         glutPostRedisplay();
@@ -193,10 +188,11 @@ void handleKeyboardEvent(unsigned char key, int, int)
 {
     if (key == 'r')
     {
-        clearState();
-    }
+        polygons.clear();
+        selectedPoints.clear();
 
-    glutPostRedisplay();
+        glutPostRedisplay();
+    }
 }
 
 /// <summary>
@@ -205,7 +201,7 @@ void handleKeyboardEvent(unsigned char key, int, int)
 /// <param name="index"></param>
 void handleRasterizationModeMenuOnSelect(int index)
 {
-    isDrawing = false;
+    selectedPoints.clear();
     mode = static_cast<RasterizationMode>(index);
     glutPostRedisplay();
 }
@@ -216,7 +212,7 @@ void handleRasterizationModeMenuOnSelect(int index)
 /// <param name="size"></param>
 void handleGridSizeMenuOnSelect(int size)
 {
-    isDrawing = false;
+    selectedPoints.clear();
     gridSize = size;
     std::cout << "Change grid size to " << size << std::endl;
     glutPostRedisplay();
@@ -227,20 +223,22 @@ void handleGridSizeMenuOnSelect(int size)
 /// </summary>
 void rasterizeLines()
 {
-    for (Polygon::Polygon polygon : polygons)
+    for (Graph2D::Polygon polygon : polygons)
     {
-        const std::vector<Vertex::Vertex>& vertices = polygon.getVertices();
+        const std::vector<Graph2D::Vertex>& vertices = polygon.getVertices();
 
-        for (auto firstIter = vertices.begin(); firstIter != vertices.end(); firstIter += 2)
+        for (auto iter = vertices.begin(); iter != vertices.end() - 1; iter += 1)
         {
-            selectedLineAlgorithm->apply(*firstIter, *(firstIter + 1));
+            selectedLineAlgorithm->apply(*iter, *(iter + 1));
         }
+
+        selectedLineAlgorithm->apply(vertices.back(), vertices.front());
     }
 }
 
 void rasterizePolygons()
 {
-    for (Polygon::Polygon polygon : polygons)
+    for (Graph2D::Polygon polygon : polygons)
     {
         selectedPolygonAlgorithm->apply(polygon.getVertices());
     }
@@ -254,24 +252,36 @@ void drawLines()
     glColor3d(0.0, 0.0, 1.0);
     glLineWidth(LINE_WIDTH);
 
-    for (Polygon::Polygon polygon : polygons)
+    for (const Graph2D::Polygon& polygon : polygons)
     {
-        glBegin(GL_LINES);
-        const std::vector<Vertex::Vertex>& vertices = polygon.getVertices();
+        const std::vector<Graph2D::Vertex>& vertices = polygon.getVertices();
 
-        for (auto iter = vertices.begin(); iter != vertices.end(); iter += 2)
+        glBegin(GL_LINES);
+        for (auto iter = vertices.begin(); iter != vertices.end() - 1; iter += 1)
         {
             glVertex2d(iter->getX(), iter->getY());
             glVertex2d((iter + 1)->getX(), (iter + 1)->getY());
         }
+
+        const auto& firstPoint = vertices.front();
+        const auto& lastPoint = vertices.back();
+        glVertex2d(lastPoint.getX(), lastPoint.getY());
+        glVertex2d(firstPoint.getX(), firstPoint.getY());
         glEnd();
     }
 
-    if (isDrawing)
+    if (isDrawing())
     {
         glColor3d(1.0, 0.0, 0.0);
         glBegin(GL_LINES);
-        glVertex2d(startMousePoint.getX(), startMousePoint.getY());
+        for (auto iter = selectedPoints.begin(); iter != selectedPoints.end() - 1; iter += 1)
+        {
+            glVertex2d(iter->getX(), iter->getY());
+            glVertex2d((iter + 1)->getX(), (iter + 1)->getY());
+        }
+
+        const auto& lastSelectedPoint = selectedPoints.back();
+        glVertex2d(lastSelectedPoint.getX(), lastSelectedPoint.getY());
         glVertex2d(mouseX, mouseY);
         glEnd();
     }
@@ -334,44 +344,6 @@ void renderScene()
 
 // Components
 /// <summary>
-/// 處理左鍵放開時的事件
-/// </summary>
-void handleMouseOnLeftClickUp()
-{
-    if (isDrawing)
-    {
-        selectedPoints.emplace_back(startMousePoint);
-        selectedPoints.emplace_back(endMousePoint);
-        printMouseMessage(endMousePoint.getX(), endMousePoint.getY());
-        isDrawing = false;
-    }
-    else
-    {
-        mouseX = startMousePoint.getX();
-        mouseY = startMousePoint.getY();
-        printMouseMessage(mouseX, mouseY);
-        isDrawing = true;
-    }
-}
-
-/// <summary>
-/// 處理左鍵按下時的事件
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-void handleMouseOnLeftClickDown(int x, int y)
-{
-    if (isDrawing)
-    {
-        endMousePoint = convertWindowCoordinateToWorldCoordinate(x, y);
-    }
-    else
-    {
-        startMousePoint = convertWindowCoordinateToWorldCoordinate(x, y);
-    }
-}
-
-/// <summary>
 /// 建構 menu
 /// </summary>
 void buildPopupMenu()
@@ -423,6 +395,15 @@ void changeSize(int w, int h)
 }
 
 // Helpers
+bool isDrawing()
+{
+    return !selectedPoints.empty();
+}
+
+bool isInSameGridCell(const Graph2D::Vertex& lhs, const Graph2D::Vertex& rhs)
+{
+    return std::round(lhs.getX()) == std::round(rhs.getX()) && std::round(lhs.getY()) == std::round(rhs.getY());
+}
 
 /// <summary>
 /// 取得單邊的 Grid 大小
@@ -434,26 +415,17 @@ double getGridBoundary()
 }
 
 /// <summary>
-/// 清除狀態
-/// </summary>
-void clearState()
-{
-    isDrawing = false;
-    selectedPoints.clear();
-}
-
-/// <summary>
 /// 轉換 Window 座標至 World 座標
 /// </summary>
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <returns></returns>
-Vertex::Vertex convertWindowCoordinateToWorldCoordinate(const int& x, const int& y)
+Graph2D::Vertex convertWindowCoordinateToWorldCoordinate(const int& x, const int& y)
 {
     const double size = getGridBoundary();
     const double worldX = (2.0 * static_cast<double>(x) / WINDOW_WIDTH - 1.0) * size;
     const double worldY = (1.0 - 2.0 * static_cast<double>(y) / WINDOW_HEIGHT) * size;
-    return Vertex::Vertex(worldX, worldY);
+    return Graph2D::Vertex(worldX, worldY);
 }
 
 /// <summary>

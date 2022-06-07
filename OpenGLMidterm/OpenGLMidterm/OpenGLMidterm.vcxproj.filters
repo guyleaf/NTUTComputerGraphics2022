@@ -31,57 +31,69 @@
     <Filter Include="標頭檔\Rasterization Algorithms\Polygon">
       <UniqueIdentifier>{20ad8367-049f-434e-9f46-0a7009dfb320}</UniqueIdentifier>
     </Filter>
+    <Filter Include="來源檔案\Graph2D">
+      <UniqueIdentifier>{ace3705a-20c6-40b6-bdfd-36cb8f8952a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="標頭檔\Graph2D">
+      <UniqueIdentifier>{0e13b5a8-a7f6-404a-9e86-c6bfa244eb19}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
-    <ClCompile Include="Vertex.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="RasterizationAlgorithms\Line\AntiAliasingAlgorithm.cpp">
+      <Filter>來源檔案\Rasterization Algorithms\Line</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\LineAlgorithm.cpp">
-      <Filter>來源檔案\Rasterization Algorithms</Filter>
+    <ClCompile Include="RasterizationAlgorithms\Line\MidPointAlgorithm.cpp">
+      <Filter>來源檔案\Rasterization Algorithms\Line</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\PolygonAlgorithm.cpp">
-      <Filter>來源檔案\Rasterization Algorithms</Filter>
-    </ClCompile>
-    <ClCompile Include="Algorithms\Polygon\ScanLineAlgorithm.cpp">
+    <ClCompile Include="RasterizationAlgorithms\Polygon\ScanLineAlgorithm.cpp">
       <Filter>來源檔案\Rasterization Algorithms\Polygon</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\Line\AntiAliasingAlgorithm.cpp">
-      <Filter>來源檔案\Rasterization Algorithms\Line</Filter>
+    <ClCompile Include="RasterizationAlgorithms\LineAlgorithm.cpp">
+      <Filter>來源檔案\Rasterization Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="Algorithms\Line\MidPointAlgorithm.cpp">
-      <Filter>來源檔案\Rasterization Algorithms\Line</Filter>
+    <ClCompile Include="RasterizationAlgorithms\PolygonAlgorithm.cpp">
+      <Filter>來源檔案\Rasterization Algorithms</Filter>
     </ClCompile>
-    <ClCompile Include="Polygon.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="Graph2D\Polygon.cpp">
+      <Filter>來源檔案\Graph2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Graph2D\Vertex.cpp">
+      <Filter>來源檔案\Graph2D</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vertex.h">
+    <ClInclude Include="graph2d.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\Line\AntiAliasingAlgorithm.h">
+    <ClInclude Include="rasterizationAlgorithms.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterizationAlgorithms\Line\AntiAliasingAlgorithm.h">
       <Filter>標頭檔\Rasterization Algorithms\Line</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\Line\MidPointAlgorithm.h">
+    <ClInclude Include="RasterizationAlgorithms\Line\MidPointAlgorithm.h">
       <Filter>標頭檔\Rasterization Algorithms\Line</Filter>
     </ClInclude>
-    <ClInclude Include="Algorithms\LineAlgorithm.h">
-      <Filter>標頭檔\Rasterization Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\PolygonAlgorithm.h">
-      <Filter>標頭檔\Rasterization Algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="Algorithms\Polygon\ScanLineAlgorithm.h">
+    <ClInclude Include="RasterizationAlgorithms\Polygon\ScanLineAlgorithm.h">
       <Filter>標頭檔\Rasterization Algorithms\Polygon</Filter>
     </ClInclude>
-    <ClInclude Include="Polygon.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="RasterizationAlgorithms\LineAlgorithm.h">
+      <Filter>標頭檔\Rasterization Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterizationAlgorithms\PolygonAlgorithm.h">
+      <Filter>標頭檔\Rasterization Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="Graph2D\Polygon.h">
+      <Filter>標頭檔\Graph2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Graph2D\Vertex.h">
+      <Filter>標頭檔\Graph2D</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

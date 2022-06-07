@@ -2,9 +2,9 @@
 
 #include "AntiAliasingAlgorithm.h"
 
-namespace Algorithms
+namespace RasterizationAlgorithms
 {
-    AntiAliasingAlgorithm::AntiAliasingAlgorithm(const std::function<void(const Vertex::Vertex&)>& setPixel) : _setPixel{ setPixel }
+    AntiAliasingAlgorithm::AntiAliasingAlgorithm(const std::function<void(const Graph2D::Vertex&)>& setPixel) : _setPixel{ setPixel }
     {
     }
 
@@ -13,7 +13,7 @@ namespace Algorithms
         return _name;
     }
 
-    void AntiAliasingAlgorithm::rasterizeLineInPositiveSlope(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, const double& slope) const
+    void AntiAliasingAlgorithm::rasterizeLineInPositiveSlope(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, const double& slope) const
     {
         double x = startVertex.getX();
         double y = startVertex.getY();
@@ -30,9 +30,9 @@ namespace Algorithms
                 const double&& alpha = x - xi;
 
                 color[3] = alpha;
-                this->_setPixel(Vertex::Vertex{ xi + 1.0, y, color });
+                this->_setPixel(Graph2D::Vertex{ xi + 1.0, y, color });
                 color[3] = 1.0 - alpha;
-                this->_setPixel(Vertex::Vertex{ xi, y, color });
+                this->_setPixel(Graph2D::Vertex{ xi, y, color });
 
                 x += 1.0 / slope;
                 y++;
@@ -48,9 +48,9 @@ namespace Algorithms
                 const double&& alpha = y - yi;
 
                 color[3] = alpha;
-                this->_setPixel(Vertex::Vertex{ x, yi + 1.0, color });
+                this->_setPixel(Graph2D::Vertex{ x, yi + 1.0, color });
                 color[3] = 1.0 - alpha;
-                this->_setPixel(Vertex::Vertex{ x, yi, color });
+                this->_setPixel(Graph2D::Vertex{ x, yi, color });
 
                 y += slope;
                 x++;
@@ -58,7 +58,7 @@ namespace Algorithms
         }
     }
 
-    void AntiAliasingAlgorithm::rasterizeLineInNegativeSlope(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, const double& slope) const
+    void AntiAliasingAlgorithm::rasterizeLineInNegativeSlope(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, const double& slope) const
     {
         double x = startVertex.getX();
         double y = startVertex.getY();
@@ -74,9 +74,9 @@ namespace Algorithms
                 const double&& alpha = x - xi;
 
                 color[3] = alpha;
-                this->_setPixel(Vertex::Vertex{ xi + 1.0, y, color });
+                this->_setPixel(Graph2D::Vertex{ xi + 1.0, y, color });
                 color[3] = 1 - alpha;
-                this->_setPixel(Vertex::Vertex{ xi, y, color });
+                this->_setPixel(Graph2D::Vertex{ xi, y, color });
 
                 x -= 1.0 / slope;
                 y--;
@@ -92,9 +92,9 @@ namespace Algorithms
                 const double&& alpha = y - yi;
 
                 color[3] = alpha;
-                this->_setPixel(Vertex::Vertex{ x, yi + 1.0, color });
+                this->_setPixel(Graph2D::Vertex{ x, yi + 1.0, color });
                 color[3] = 1 - alpha;
-                this->_setPixel(Vertex::Vertex{ x, yi, color });
+                this->_setPixel(Graph2D::Vertex{ x, yi, color });
 
                 y += slope;
                 x++;
@@ -102,7 +102,7 @@ namespace Algorithms
         }
     }
 
-    void AntiAliasingAlgorithm::apply(Vertex::Vertex startVertex, Vertex::Vertex endVertex) const
+    void AntiAliasingAlgorithm::apply(Graph2D::Vertex startVertex, Graph2D::Vertex endVertex) const
     {
         this->sortPoints(startVertex, endVertex);
         this->roundPoints(startVertex, endVertex);

@@ -3,14 +3,14 @@
 #include <string>
 
 #include "./LineAlgorithm.h"
-#include "../Vertex.h"
+#include "../Graph2D/Vertex.h"
 
 
-namespace Algorithms
+namespace RasterizationAlgorithms
 {
     LineAlgorithm::~LineAlgorithm() = default;
 
-    void LineAlgorithm::sortPoints(Vertex::Vertex& startVertex, Vertex::Vertex& endVertex) const
+    void LineAlgorithm::sortPoints(Graph2D::Vertex& startVertex, Graph2D::Vertex& endVertex) const
     {
         const double startX = startVertex.getX();
         const double startY = startVertex.getY();
@@ -23,7 +23,7 @@ namespace Algorithms
         }
     }
 
-    void LineAlgorithm::roundPoints(Vertex::Vertex& startVertex, Vertex::Vertex& endVertex) const
+    void LineAlgorithm::roundPoints(Graph2D::Vertex& startVertex, Graph2D::Vertex& endVertex) const
     {
         startVertex.setX(std::round(startVertex.getX()));
         startVertex.setY(std::round(startVertex.getY()));

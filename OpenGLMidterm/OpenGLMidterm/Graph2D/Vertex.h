@@ -2,7 +2,7 @@
 #include <array>
 #include <utility>
 
-namespace Vertex
+namespace Graph2D
 {
 	class Vertex
 	{
@@ -47,6 +47,8 @@ namespace Vertex
 		Vertex& operator-=(const Vertex& secondVertex);
 		Vertex& operator*=(const double);
 		Vertex& operator/=(const double);
+
+		friend bool operator==(const Vertex&, const Vertex&);
 	private:
 		std::pair<double, double> _coordinate;
 		std::array<double, 4> _color{ 0.0, 0.0, 0.0, 1.0 };

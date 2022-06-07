@@ -3,9 +3,9 @@
 #include "ScanLineAlgorithm.h"
 
 
-namespace Algorithms
+namespace RasterizationAlgorithms
 {
-    ScanLineAlgorithm::ScanLineAlgorithm(const std::function<void(const Vertex::Vertex&)>& setPixel) : _setPixel{ setPixel }
+    ScanLineAlgorithm::ScanLineAlgorithm(const std::function<void(const Graph2D::Vertex&)>& setPixel) : _setPixel{ setPixel }
     {
 
     }
@@ -18,10 +18,10 @@ namespace Algorithms
     /// <summary>
     /// 使用此演算法
     /// </summary>
-    void ScanLineAlgorithm::apply(const std::vector<Vertex::Vertex>& vertices) const
+    void ScanLineAlgorithm::apply(const std::vector<Graph2D::Vertex>& vertices) const
     {
         // ensure vList is stored in counterclockwise order
-        std::vector<Vertex::Vertex> vList;
+        std::vector<Graph2D::Vertex> vList;
         if (isVerticesStoredInCounterclockwiseOrder(vertices))
         {
             vList.assign(vertices.begin(), vertices.end());
@@ -35,7 +35,7 @@ namespace Algorithms
         scanXY(vList, iMin);
     }
 
-    void ScanLineAlgorithm::scanXY(const std::vector<Vertex::Vertex>& vList, size_t iMin) const
+    void ScanLineAlgorithm::scanXY(const std::vector<Graph2D::Vertex>& vList, size_t iMin) const
     {
         Edge lEdge;
         Edge rEdge;
@@ -59,7 +59,7 @@ namespace Algorithms
         }
     }
 
-    void ScanLineAlgorithm::scanX(const std::vector<Vertex::Vertex>& vList, const size_t& li, const size_t& ri, Edge& lEdge, Edge& rEdge, int& scanLineY) const
+    void ScanLineAlgorithm::scanX(const std::vector<Graph2D::Vertex>& vList, const size_t& li, const size_t& ri, Edge& lEdge, Edge& rEdge, int& scanLineY) const
     {
         int&& ly = static_cast<int>(std::ceil(vList[li].getY()));
         int&& ry = static_cast<int>(std::ceil(vList[ri].getY()));
@@ -74,7 +74,7 @@ namespace Algorithms
                 // diff
                 for (int x = lx; x < rx; x++)
                 {
-                    _setPixel(Vertex::Vertex(x, scanLineY, 1.0, 0.0, 0.0, 1.0));
+                    _setPixel(Graph2D::Vertex(x, scanLineY, 1.0, 0.0, 0.0, 1.0));
                     // increment
                 }
             }
@@ -85,7 +85,7 @@ namespace Algorithms
         }
     }
 
-    void ScanLineAlgorithm::findEdge(const std::vector<Vertex::Vertex>& vList, size_t& rem, size_t& iVertex, Edge& edge, int scanLineY, bool leftOrRight) const
+    void ScanLineAlgorithm::findEdge(const std::vector<Graph2D::Vertex>& vList, size_t& rem, size_t& iVertex, Edge& edge, int scanLineY, bool leftOrRight) const
     {
         size_t&& n{ vList.size() };
 
@@ -130,26 +130,26 @@ namespace Algorithms
         edge.position.setX(edge.position.getX() + edge.difference.getX());
     }
 
-    void ScanLineAlgorithm::differenceX(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, Edge& edge, int x) const
+    void ScanLineAlgorithm::differenceX(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Edge& edge, int x) const
     {
         double&& startX = startVertex.getX();
         difference(startVertex, endVertex, edge, (endVertex.getX() - startX), x - startX);
     }
 
-    void ScanLineAlgorithm::differenceY(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, Edge& edge, int y) const
+    void ScanLineAlgorithm::differenceY(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Edge& edge, int y) const
     {
         double&& startY = startVertex.getY();
         difference(startVertex, endVertex, edge, (endVertex.getY() - startY), y - startY);
     }
 
-    void ScanLineAlgorithm::difference(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, Edge& edge, double diff, double amountOfStep) const
+    void ScanLineAlgorithm::difference(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Edge& edge, double diff, double amountOfStep) const
     {
         double&& deX = (endVertex.getX() - startVertex.getX()) / diff;
         edge.difference.setX(deX);
         edge.position.setX(startVertex.getX() + amountOfStep * deX);
     }
 
-    size_t ScanLineAlgorithm::findIndexWithSmallestY(const std::vector<Vertex::Vertex>& vertices) const
+    size_t ScanLineAlgorithm::findIndexWithSmallestY(const std::vector<Graph2D::Vertex>& vertices) const
     {
         size_t iMin = 0;
         for (size_t i = 1; i < vertices.size(); i++)
@@ -164,7 +164,7 @@ namespace Algorithms
     }
 
     // Refer to: shoelace algorithm https://en.wikipedia.org/wiki/Shoelace_formula#Shoelace_formula
-    bool ScanLineAlgorithm::isVerticesStoredInCounterclockwiseOrder(const std::vector<Vertex::Vertex>& vertices) const
+    bool ScanLineAlgorithm::isVerticesStoredInCounterclockwiseOrder(const std::vector<Graph2D::Vertex>& vertices) const
     {
         size_t length = vertices.size();
         double area = 0.0;

@@ -2,9 +2,9 @@
 
 #include "MidPointAlgorithm.h"
 
-namespace Algorithms
+namespace RasterizationAlgorithms
 {
-    MidPointAlgorithm::MidPointAlgorithm(const std::function<void(const Vertex::Vertex&)>& setPixel) : _setPixel{ setPixel }
+    MidPointAlgorithm::MidPointAlgorithm(const std::function<void(const Graph2D::Vertex&)>& setPixel) : _setPixel{ setPixel }
     {
     }
 
@@ -13,7 +13,7 @@ namespace Algorithms
         return _name;
     }
 
-    void MidPointAlgorithm::rasterizeLineInPositiveSlope(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, const double& dx, const double& dy) const
+    void MidPointAlgorithm::rasterizeLineInPositiveSlope(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, const double& dx, const double& dy) const
     {
         const bool isSlopeBiggerThanOne = std::abs(dy) >= std::abs(dx);
         const double delNE = 2 * (dy - dx);
@@ -33,7 +33,7 @@ namespace Algorithms
 
         double x = startVertex.getX();
         double y = startVertex.getY();
-        this->_setPixel(Vertex::Vertex{ x, y, _color });
+        this->_setPixel(Graph2D::Vertex{ x, y, _color });
 
         if (isSlopeBiggerThanOne)
         {
@@ -51,7 +51,7 @@ namespace Algorithms
                     x++;
                 }
                 y++;
-                this->_setPixel(Vertex::Vertex{ x, y, _color });
+                this->_setPixel(Graph2D::Vertex{ x, y, _color });
             }
         }
         else
@@ -70,12 +70,12 @@ namespace Algorithms
                     y++;
                 }
                 x++;
-                this->_setPixel(Vertex::Vertex{ x, y, _color });
+                this->_setPixel(Graph2D::Vertex{ x, y, _color });
             }
         }
     }
 
-    void MidPointAlgorithm::rasterizeLineInNegativeSlope(const Vertex::Vertex& startVertex, const Vertex::Vertex& endVertex, const double& dx, const double& dy) const
+    void MidPointAlgorithm::rasterizeLineInNegativeSlope(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, const double& dx, const double& dy) const
     {
         const bool isSlopeBiggerThanOne = std::abs(dy) >= std::abs(dx);
         const double delNE = 2 * (dy + dx);
@@ -95,7 +95,7 @@ namespace Algorithms
 
         double x = startVertex.getX();
         double y = startVertex.getY();
-        this->_setPixel(Vertex::Vertex{ x, y, _color });
+        this->_setPixel(Graph2D::Vertex{ x, y, _color });
 
         if (isSlopeBiggerThanOne)
         {
@@ -113,7 +113,7 @@ namespace Algorithms
                     x++;
                 }
                 y--;
-                this->_setPixel(Vertex::Vertex{ x, y, _color });
+                this->_setPixel(Graph2D::Vertex{ x, y, _color });
             }
         }
         else
@@ -132,12 +132,12 @@ namespace Algorithms
                     y--;
                 }
                 x++;
-                this->_setPixel(Vertex::Vertex{ x, y, _color });
+                this->_setPixel(Graph2D::Vertex{ x, y, _color });
             }
         }
     }
 
-    void MidPointAlgorithm::apply(Vertex::Vertex startVertex, Vertex::Vertex endVertex) const
+    void MidPointAlgorithm::apply(Graph2D::Vertex startVertex, Graph2D::Vertex endVertex) const
     {
         this->sortPoints(startVertex, endVertex);
         this->roundPoints(startVertex, endVertex);

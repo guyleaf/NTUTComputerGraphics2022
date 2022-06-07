@@ -151,26 +151,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Algorithms\LineAlgorithm.cpp" />
-    <ClCompile Include="Algorithms\Line\AntiAliasingAlgorithm.cpp" />
-    <ClCompile Include="Algorithms\Line\MidPointAlgorithm.cpp" />
-    <ClCompile Include="Algorithms\PolygonAlgorithm.cpp" />
-    <ClCompile Include="Algorithms\Polygon\ScanLineAlgorithm.cpp" />
+    <ClCompile Include="Graph2D\Polygon.cpp" />
+    <ClCompile Include="Graph2D\Vertex.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Polygon.cpp" />
-    <ClCompile Include="Vertex.cpp" />
+    <ClCompile Include="RasterizationAlgorithms\LineAlgorithm.cpp" />
+    <ClCompile Include="RasterizationAlgorithms\Line\AntiAliasingAlgorithm.cpp" />
+    <ClCompile Include="RasterizationAlgorithms\Line\MidPointAlgorithm.cpp" />
+    <ClCompile Include="RasterizationAlgorithms\PolygonAlgorithm.cpp" />
+    <ClCompile Include="RasterizationAlgorithms\Polygon\ScanLineAlgorithm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Algorithms\LineAlgorithm.h" />
-    <ClInclude Include="Algorithms\Line\AntiAliasingAlgorithm.h" />
-    <ClInclude Include="Algorithms\Line\MidPointAlgorithm.h" />
-    <ClInclude Include="Algorithms\PolygonAlgorithm.h" />
-    <ClInclude Include="Algorithms\Polygon\ScanLineAlgorithm.h" />
-    <ClInclude Include="Polygon.h" />
-    <ClInclude Include="Vertex.h" />
+    <ClInclude Include="graph2d.h" />
+    <ClInclude Include="Graph2D\Polygon.h" />
+    <ClInclude Include="Graph2D\Vertex.h" />
+    <ClInclude Include="rasterizationAlgorithms.h" />
+    <ClInclude Include="RasterizationAlgorithms\LineAlgorithm.h" />
+    <ClInclude Include="RasterizationAlgorithms\Line\AntiAliasingAlgorithm.h" />
+    <ClInclude Include="RasterizationAlgorithms\Line\MidPointAlgorithm.h" />
+    <ClInclude Include="RasterizationAlgorithms\PolygonAlgorithm.h" />
+    <ClInclude Include="RasterizationAlgorithms\Polygon\ScanLineAlgorithm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

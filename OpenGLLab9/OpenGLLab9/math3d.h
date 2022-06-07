@@ -3,47 +3,15 @@
 // Only implement the needs for my lab9 work
 
 #pragma once
+#ifndef MATH3D_H
+#define MATH3D_H
 
-#ifndef MATH_3D_H
-#define MATH_3D_H
+#include <cmath>
 #include <array>
 #include <utility>
 
 namespace math3d
 {
-    template<typename T>
-    class Vector2 : public std::array<T, 2>
-    {
-    public:
-        Vector2(T x, T y);
-        friend Vector2<T> operator+(const Vector2<T>& lhs, const Vector2<T>& rhs);
-        friend Vector2<T> operator-(const Vector2<T>& lhs, const Vector2<T>& rhs);
-        friend T operator*(const Vector2<T>& lhs, const Vector2<T>& rhs);
-    };
-
-    template<typename T>
-    Vector2<T>::Vector2(T x, T y) : std::array<T, 2>{ std::move(x), std::move(y) }
-    {
-    }
-
-    template<typename T>
-    Vector2<T> operator+(const Vector2<T>& lhs, const Vector2<T>& rhs)
-    {
-        return { lhs[0] + rhs[0], lhs[1] + rhs[1] };
-    }
-
-    template<typename T>
-    Vector2<T> operator-(const Vector2<T>& lhs, const Vector2<T>& rhs)
-    {
-        return { lhs[0] - rhs[0], lhs[1] - rhs[1] };
-    }
-
-    template<typename T>
-    T operator*(const Vector2<T>& lhs, const Vector2<T>& rhs)
-    {
-        return lhs[0] * rhs[0] + lhs[1] * rhs[1];
-    }
-
     // 2D vector
     using M3DVector2f = std::array<float, 2>;
     using M3DVector2d = std::array<double, 2>;
@@ -53,8 +21,8 @@ namespace math3d
     using M3DVector3d = std::array<double, 3>;
 
     // for other usages
-    using M3DVector4f = std::array<float, 3>;
-    using M3DVector4d = std::array<double, 3>;
+    using M3DVector4f = std::array<float, 4>;
+    using M3DVector4d = std::array<double, 4>;
 
     // 3x3 matrix - column major. X vector is 0, 1, 2, etc. (OpenGL style)
     //  0	3	6	
@@ -76,14 +44,14 @@ namespace math3d
     M3DVector4d getPlaneEquation(const M3DVector3d& point1, const M3DVector3d& point2, const M3DVector3d& point3);
 
     // Planar shadow Matrix
-    M3DMatrix44d makePlanarShadowMatrix(const M3DVector4d& planeEq, const M3DVector3d& vLightPos);
-    M3DMatrix44f makePlanarShadowMatrix(const M3DVector4f& planeEq, const M3DVector3f& vLightPos);
+    M3DMatrix44d makePlanarShadowMatrix(const M3DVector4d& planeEq, const M3DVector4d& vLightPos);
+    M3DMatrix44f makePlanarShadowMatrix(const M3DVector4f& planeEq, const M3DVector4f& vLightPos);
 
     // Calculates the normal of a triangle specified by the three points
     // p1, p2, and p3. Each pointer points to an array of three floats. The
     // triangle is assumed to be wound counter clockwise.
     M3DVector3f findNormal(const M3DVector3f& point1, const M3DVector3f& point2, const M3DVector3f& point3);
-    M3DVector3f findNormal(const M3DVector3d& point1, const M3DVector3d& point2, const M3DVector3d& point3);
+    M3DVector3d findNormal(const M3DVector3d& point1, const M3DVector3d& point2, const M3DVector3d& point3);
 
     // Cross Product
     // u x v = result
@@ -98,68 +66,78 @@ namespace math3d
         return { u[1] * v[2] - v[1] * u[2], -u[0] * v[2] + v[0] * u[2], u[0] * v[1] - v[0] * u[1] };
     }
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // Operators for data structures
-    inline M3DVector2f operator+(const M3DVector2f& lhs, const M3DVector2f& rhs)
+    // Get the length of vector
+    inline float getVectorLength(const M3DVector3f& u)
     {
-        return { lhs[0] + rhs[0], lhs[1] + rhs[1] };
+        return std::sqrtf(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
     }
 
-    inline M3DVector2d operator+(const M3DVector2d& lhs, const M3DVector2d& rhs)
+    inline double getVectorLength(const M3DVector3d& u)
     {
-        return { lhs[0] + rhs[0], lhs[1] + rhs[1] };
+        return std::sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
     }
 
-    inline M3DVector3f operator+(const M3DVector3f& lhs, const M3DVector3f& rhs)
+    inline float getVectorLength(const M3DVector4f& u)
     {
-        return { lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2] };
+        return std::sqrtf(u[0] * u[0] + u[1] * u[1] + u[2] * u[2] + u[3] * u[3]);
     }
 
-    inline M3DVector3d operator+(const M3DVector3d& lhs, const M3DVector3d& rhs)
+    inline double getVectorLength(const M3DVector4d& u)
     {
-        return { lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2] };
+        return std::sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2] + u[3] * u[3]);
     }
 
-    // Minus
-    inline M3DVector2f operator-(const M3DVector2f& lhs, const M3DVector2f& rhs)
+    // Scale a vector
+    inline void scaleVector(M3DVector3f& u, float scale)
     {
-        return { lhs[0] - rhs[0], lhs[1] - rhs[1] };
+        u[0] *= scale;
+        u[1] *= scale;
+        u[2] *= scale;
     }
 
-    inline M3DVector2d operator-(const M3DVector2d& lhs, const M3DVector2d& rhs)
+    inline void scaleVector(M3DVector3d& u, double scale)
     {
-        return { lhs[0] - rhs[0], lhs[1] - rhs[1] };
+        u[0] *= scale;
+        u[1] *= scale;
+        u[2] *= scale;
     }
 
-    inline M3DVector3f operator-(const M3DVector3f& lhs, const M3DVector3f& rhs)
+    inline void scaleVector(M3DVector4f& u, float scale)
     {
-        return { lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2] };
+        u[0] *= scale;
+        u[1] *= scale;
+        u[2] *= scale;
+        u[3] *= scale;
     }
 
-    inline M3DVector3d operator-(const M3DVector3d& lhs, const M3DVector3d& rhs)
+    inline void scaleVector(M3DVector4d& u, double scale)
     {
-        return { lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2] };
+        u[0] *= scale;
+        u[1] *= scale;
+        u[2] *= scale;
+        u[3] *= scale;
     }
 
-    // Inner Product
-    inline float operator*(const M3DVector2f& lhs, const M3DVector2f& rhs)
+    // Normalize a vector
+    // Scale a vector to unit length. Easy, just scale the vector by it's length
+    inline void normalizeVector(M3DVector3f& u)
     {
-        return lhs[0] * rhs[0] + lhs[1] * rhs[1];
+        scaleVector(u, 1.0f / getVectorLength(u));
     }
 
-    inline double operator*(const M3DVector2d& lhs, const M3DVector2d& rhs)
+    inline void normalizeVector(M3DVector3d& u)
     {
-        return lhs[0] * rhs[0] + lhs[1] * rhs[1];
+        scaleVector(u, 1.0 / getVectorLength(u));
     }
 
-    inline float operator*(const M3DVector3f& lhs, const M3DVector3f& rhs)
+    inline void normalizeVector(M3DVector4f& u)
     {
-        return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+        scaleVector(u, 1.0f / getVectorLength(u));
     }
 
-    inline double operator*(const M3DVector3d& lhs, const M3DVector3d& rhs)
+    inline void normalizeVector(M3DVector4d& u)
     {
-        return lhs[0] * rhs[0] + lhs[1] * rhs[1];
+        scaleVector(u, 1.0 / getVectorLength(u));
     }
 }
 

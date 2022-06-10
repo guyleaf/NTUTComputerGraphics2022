@@ -14,4 +14,31 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sphereworld.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\grass.tga">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="resources\orb.tga">
+      <Filter>資源檔</Filter>
+    </Image>
+    <Image Include="resources\wood.tga">
+      <Filter>資源檔</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libs\glframe.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\gltools.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="libs\math3d.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

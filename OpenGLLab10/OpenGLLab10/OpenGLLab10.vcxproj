@@ -135,6 +135,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="gltools.cpp" />
+    <ClCompile Include="libs\math3d.cpp" />
     <ClCompile Include="sphereworld.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -143,9 +145,11 @@
     <Image Include="resources\wood.tga" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="libs\glframe.h" />
     <ClInclude Include="libs\gltools.h" />
-    <ClInclude Include="libs\math3d.h" />
+    <ClInclude Include="libs\math3d.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

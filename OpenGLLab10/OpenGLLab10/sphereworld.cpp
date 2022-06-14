@@ -6,6 +6,8 @@
 // Program by Richard S. Wright Jr.
 
 #include <cmath>
+#include <random>
+#include <memory>
 #include <array>
 #include <vector>
 #include <string>
@@ -13,8 +15,8 @@
 #include "libs/math3d.hpp"
 
 constexpr size_t NUM_SPHERES = 30;
-GLFrame spheres[NUM_SPHERES];
-GLFrame frameCamera;
+std::array<Math3D::M3DVector3f, NUM_SPHERES> spheres;
+Math3D::M3DVector3d cameraPos{ 0.0, 0.0, 0.0 };
 
 // Light and material Data
 const Math3D::M3DVector4f fLightPos = {-100.0f, 100.0f, 50.0f, 1.0f}; // Point source
@@ -58,8 +60,7 @@ void SetupRC()
     glFrontFace(GL_CCW);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_MULTISAMPLE_ARB);
-
+    
     // Setup light parameters
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, fNoLight.data());
     glLightfv(GL_LIGHT0, GL_AMBIENT, fLowLight.data());
@@ -78,11 +79,15 @@ void SetupRC()
     glMaterialfv(GL_FRONT, GL_SPECULAR, fBrightLight.data());
     glMateriali(GL_FRONT, GL_SHININESS, 128);
 
+    std::random_device rd;
+    std::uniform_int_distribution<int> range(0, 399);
     // Randomly place the sphere inhabitants
     for (size_t iSphere = 0; iSphere < NUM_SPHERES; iSphere++)
     {
         // Pick a random location between -20 and 20 at .1 increments
-        spheres[iSphere].SetOrigin(((float)((rand() % 400) - 200) * 0.1f), 0.0, (float)((rand() % 400) - 200) * 0.1f);
+        float &&x = (float)(range(rd) - 200) * 0.1f;
+        float &&z = (float)(range(rd) - 200) * 0.1f;
+        spheres[iSphere] = Math3D::M3DVector3f{ x, 0.0f, z};
     }
 
     // Set up texture maps
@@ -92,7 +97,6 @@ void SetupRC()
 
     for (size_t i = 0; i < NUM_TEXTURES; i++)
     {
-        GLbyte *pBytes;
         GLint iWidth;
         GLint iHeight;
         GLint iComponents;
@@ -101,14 +105,13 @@ void SetupRC()
         glBindTexture(GL_TEXTURE_2D, textureObjects[i]);
 
         // Load this texture map
-        pBytes = gltLoadTGA(szTextureFiles[i].c_str(), &iWidth, &iHeight, &iComponents, &eFormat);
-        gluBuild2DMipmaps(GL_TEXTURE_2D, iComponents, iWidth, iHeight, eFormat, GL_UNSIGNED_BYTE, pBytes);
-        free(pBytes);
+        std::unique_ptr<GLbyte[]> pBytes = gltLoadTGA("resources/" + szTextureFiles[i], iWidth, iHeight, iComponents, eFormat);
+        gluBuild2DMipmaps(GL_TEXTURE_2D, iComponents, iWidth, iHeight, eFormat, GL_UNSIGNED_BYTE, pBytes.get());
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     }
 }
 
@@ -164,24 +167,27 @@ void DrawGround(void)
 
 ///////////////////////////////////////////////////////////////////////
 // Draw random inhabitants and the rotating torus/sphere duo
-void DrawInhabitants(GLint nShadow)
+void DrawInhabitants(bool isShadow)
 {
     static GLfloat yRot = 0.0f; // Rotation angle for animation
 
-    if (nShadow == 0)
+    if (isShadow)
+    {
+        glColor4f(0.0f, 0.0f, 0.0f, .6f); // Shadow color
+    }
+    else
     {
         yRot += 0.5f;
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
-    else
-        glColor4f(0.00f, 0.00f, 0.00f, .6f); // Shadow color
 
     // Draw the randomly located spheres
     glBindTexture(GL_TEXTURE_2D, textureObjects[SPHERE_TEXTURE]);
     for (size_t i = 0; i < NUM_SPHERES; i++)
     {
         glPushMatrix();
-        spheres[i].ApplyActorTransform();
+        glTranslatef(spheres[i][0], spheres[i][1], spheres[i][2]);
+        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
         gltDrawSphere(0.3f, 21, 11);
         glPopMatrix();
     }
@@ -196,7 +202,7 @@ void DrawInhabitants(GLint nShadow)
     gltDrawSphere(0.1f, 21, 11);
     glPopMatrix();
 
-    if (nShadow == 0)
+    if (!isShadow)
     {
         // Torus alone will be specular
         glMaterialfv(GL_FRONT, GL_SPECULAR, fBrightLight.data());
@@ -216,7 +222,8 @@ void RenderScene(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glPushMatrix();
-    frameCamera.ApplyCameraTransform();
+
+    gluLookAt(cameraPos[0], cameraPos[1], cameraPos[2], cameraPos[0], cameraPos[1], cameraPos[2] - 1.0, 0.0, 1.0, 0.0);
 
     // Position light before any other transformations
     glLightfv(GL_LIGHT0, GL_POSITION, fLightPos.data());
@@ -234,7 +241,7 @@ void RenderScene(void)
     glEnable(GL_STENCIL_TEST);
     glPushMatrix();
     glMultMatrixf(mShadowMatrix.data());
-    DrawInhabitants(1);
+    DrawInhabitants(true);
     glPopMatrix();
     glDisable(GL_STENCIL_TEST);
     glDisable(GL_BLEND);
@@ -243,7 +250,7 @@ void RenderScene(void)
     glEnable(GL_DEPTH_TEST);
 
     // Draw inhabitants normally
-    DrawInhabitants(0);
+    DrawInhabitants(false);
 
     glPopMatrix();
 
@@ -254,17 +261,17 @@ void RenderScene(void)
 // Respond to arrow keys by moving the camera frame of reference
 void SpecialKeys(int key, int x, int y)
 {
-    if (key == GLUT_KEY_UP)
-        frameCamera.MoveForward(0.1f);
+    //if (key == GLUT_KEY_UP)
+    //    frameCamera.MoveForward(0.1f);
 
-    if (key == GLUT_KEY_DOWN)
-        frameCamera.MoveForward(-0.1f);
+    //if (key == GLUT_KEY_DOWN)
+    //    frameCamera.MoveForward(-0.1f);
 
-    if (key == GLUT_KEY_LEFT)
-        frameCamera.RotateLocalY(0.1f);
+    //if (key == GLUT_KEY_LEFT)
+    //    frameCamera.RotateLocalY(0.1f);
 
-    if (key == GLUT_KEY_RIGHT)
-        frameCamera.RotateLocalY(-0.1f);
+    //if (key == GLUT_KEY_RIGHT)
+    //    frameCamera.RotateLocalY(-0.1f);
 
     // Refresh the Window
     glutPostRedisplay();
@@ -282,8 +289,6 @@ void TimerFunction(int)
 
 void ChangeSize(int w, int h)
 {
-    GLfloat fAspect;
-
     // Prevent a divide by zero, when window is too short
     // (you cant make a window of zero width).
     if (h == 0)
@@ -291,7 +296,7 @@ void ChangeSize(int w, int h)
 
     glViewport(0, 0, w, h);
 
-    fAspect = (GLfloat)w / (GLfloat)h;
+    GLfloat fAspect = (GLfloat)w / (GLfloat)h;
 
     // Reset the coordinate system before modifying
     glMatrixMode(GL_PROJECTION);
@@ -307,7 +312,7 @@ void ChangeSize(int w, int h)
 int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH | GLUT_STENCIL | GLUT_MULTISAMPLE);
     glutInitWindowSize(800, 600);
     glutCreateWindow("OpenGL SphereWorld Demo + Texture Maps");
     glutReshapeFunc(ChangeSize);

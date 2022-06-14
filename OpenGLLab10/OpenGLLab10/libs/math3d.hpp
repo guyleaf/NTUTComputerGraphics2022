@@ -12,6 +12,8 @@
 
 namespace Math3D
 {
+    constexpr double M3D_PI = 3.14159265358979323846;
+
     // 2D vector
     using M3DVector2f = std::array<float, 2>;
     using M3DVector2d = std::array<double, 2>;

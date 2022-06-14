@@ -18,6 +18,12 @@
     <ClCompile Include="sphereworld.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="libs\math3d.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="gltools.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\grass.tga">
@@ -31,14 +37,14 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="libs\glframe.h">
+    <ClInclude Include="libs\math3d.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="libs\gltools.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
-    <ClInclude Include="libs\math3d.h">
-      <Filter>標頭檔</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
   </ItemGroup>
 </Project>

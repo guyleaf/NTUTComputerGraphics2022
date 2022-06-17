@@ -14,8 +14,6 @@
 #include "libs/gltools.h"
 #include "libs/math3d.hpp"
 
-constexpr size_t NUM_SPHERES = 30;
-std::array<Math3D::M3DVector3f, NUM_SPHERES> spheres;
 Math3D::M3DVector3d cameraPos{ 0.0, 0.0, 0.0 };
 
 // Light and material Data
@@ -33,6 +31,9 @@ constexpr size_t NUM_TEXTURES = 3;
 std::array<GLuint, NUM_TEXTURES> textureObjects;
 
 const std::vector<std::string> szTextureFiles = { "grass.tga", "wood.tga", "orb.tga" };
+
+bool isAnimationPaused = false;
+constexpr int animationSpeed = 33;
 
 //////////////////////////////////////////////////////////////////
 // This function does any needed initialization on the rendering
@@ -79,17 +80,6 @@ void SetupRC()
     glMaterialfv(GL_FRONT, GL_SPECULAR, fBrightLight.data());
     glMateriali(GL_FRONT, GL_SHININESS, 128);
 
-    std::random_device rd;
-    std::uniform_int_distribution<int> range(0, 399);
-    // Randomly place the sphere inhabitants
-    for (size_t iSphere = 0; iSphere < NUM_SPHERES; iSphere++)
-    {
-        // Pick a random location between -20 and 20 at .1 increments
-        float &&x = (float)(range(rd) - 200) * 0.1f;
-        float &&z = (float)(range(rd) - 200) * 0.1f;
-        spheres[iSphere] = Math3D::M3DVector3f{ x, 0.0f, z};
-    }
-
     // Set up texture maps
     glEnable(GL_TEXTURE_2D);
     glGenTextures(NUM_TEXTURES, textureObjects.data());
@@ -108,8 +98,8 @@ void SetupRC()
         std::unique_ptr<GLbyte[]> pBytes = gltLoadTGA("resources/" + szTextureFiles[i], iWidth, iHeight, iComponents, eFormat);
         gluBuild2DMipmaps(GL_TEXTURE_2D, iComponents, iWidth, iHeight, eFormat, GL_UNSIGNED_BYTE, pBytes.get());
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     }
@@ -165,53 +155,138 @@ void DrawGround(void)
     }
 }
 
-///////////////////////////////////////////////////////////////////////
-// Draw random inhabitants and the rotating torus/sphere duo
-void DrawInhabitants(bool isShadow)
+void drawTorso()
 {
-    static GLfloat yRot = 0.0f; // Rotation angle for animation
 
-    if (isShadow)
+}
+
+void drawHead()
+{
+
+}
+
+void drawUpperArm()
+{
+
+}
+
+void drawLowerArm()
+{
+
+}
+
+void drawHand()
+{
+
+}
+
+void drawUpperLeg()
+{
+
+}
+
+void drawLowerLeg()
+{
+
+}
+
+void drawFoot()
+{
+
+}
+
+void drawArm()
+{
+    // r = 0.03, H x W = 0.13 * 0.04
+    drawUpperArm();
+
+    glPushMatrix();
+    glTranslatef(0.0f, -0.16f, 0.0f);
+    // r = 0.03, H x W = 0.13 * 0.04
+    drawLowerArm();
+
+    glPushMatrix();
+    glTranslatef(0.0f, -0.13f, 0.0f);
+    drawHand();
+    glPopMatrix();
+    glPopMatrix();
+}
+
+void drawButtock()
+{
+    glColor3f(0.5f, 0.0f, 0.0f);
+    glBegin(GL_POLYGON);
+    glEnd();
+}
+
+void drawLeg()
+{
+    // r = 0.03, H x W = 0.13 * 0.04
+    drawUpperLeg();
+
+    glPushMatrix();
+    glTranslatef(0.0f, -0.16f, 0.0f);
+    // r = 0.03, H x W = 0.13 * 0.04
+    drawLowerLeg();
+
+    glPushMatrix();
+    glTranslatef(0.0f, -0.13f, 0.0f);
+    drawLeg();
+    glPopMatrix();
+    glPopMatrix();
+}
+
+void drawRobot(bool drawShadow)
+{
+    if (drawShadow)
     {
         glColor4f(0.0f, 0.0f, 0.0f, .6f); // Shadow color
     }
     else
     {
-        yRot += 0.5f;
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    // Draw the randomly located spheres
-    glBindTexture(GL_TEXTURE_2D, textureObjects[SPHERE_TEXTURE]);
-    for (size_t i = 0; i < NUM_SPHERES; i++)
-    {
-        glPushMatrix();
-        glTranslatef(spheres[i][0], spheres[i][1], spheres[i][2]);
-        glRotatef(180.0f, 0.0f, 1.0f, 0.0f);
-        gltDrawSphere(0.3f, 21, 11);
-        glPopMatrix();
-    }
+    glPushMatrix();
+
+    glTranslatef(0.0f, 0.2f, 0.0f);
+    // H x W = 0.2 * 0.1
+    drawTorso();
 
     glPushMatrix();
-    glTranslatef(0.0f, 0.1f, -2.5f);
-
-    glPushMatrix();
-    glRotatef(-yRot * 2.0f, 0.0f, 1.0f, 0.0f);
-    glTranslatef(1.0f, 0.0f, 0.0f);
-    
-    gltDrawSphere(0.1f, 21, 11);
+    glTranslatef(0.0f, 0.05f, 0.0f);
+    // r = 0.05
+    drawHead();
     glPopMatrix();
 
-    if (!isShadow)
-    {
-        // Torus alone will be specular
-        glMaterialfv(GL_FRONT, GL_SPECULAR, fBrightLight.data());
-    }
+    // right arm
+    glPushMatrix();
+    glTranslatef(-0.08f, 0.0f, 0.0f);
+    drawArm();
+    glPopMatrix();
 
-    glRotatef(yRot, 0.0f, 1.0f, 0.0f);
-    glBindTexture(GL_TEXTURE_2D, textureObjects[TORUS_TEXTURE]);
-    gltDrawTorus(0.35f, 0.15f, 61, 37);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, fNoLight.data());
+    // left arm
+    glPushMatrix();
+    glTranslatef(0.08f, 0.0f, 0.0f);
+    drawArm();
+    glPopMatrix();
+
+    glPopMatrix();
+
+    glPushMatrix();
+    drawButtock();
+
+    // right leg
+    glPushMatrix();
+    glTranslatef(-0.03f, 0.0f, 0.0f);
+    drawLeg();
+    glPopMatrix();
+
+    // left leg
+    glPushMatrix();
+    glTranslatef(0.03f, 0.0f, 0.0f);
+    drawLeg();
+    glPopMatrix();
     glPopMatrix();
 }
 
@@ -232,25 +307,27 @@ void RenderScene(void)
     glColor3f(1.0f, 1.0f, 1.0f);
     DrawGround();
 
-    // Draw shadows first
+    // Draw the shadow of robot first
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_STENCIL_TEST);
+
     glPushMatrix();
     glMultMatrixf(mShadowMatrix.data());
-    DrawInhabitants(true);
+    drawRobot(true);
     glPopMatrix();
+
     glDisable(GL_STENCIL_TEST);
     glDisable(GL_BLEND);
     glEnable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
 
-    // Draw inhabitants normally
-    DrawInhabitants(false);
+    // Draw the robot
+    drawRobot(false);
 
     glPopMatrix();
 
@@ -274,7 +351,7 @@ void SpecialKeys(int key, int x, int y)
     //    frameCamera.RotateLocalY(-0.1f);
 
     // Refresh the Window
-    glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 ///////////////////////////////////////////////////////////
@@ -282,9 +359,23 @@ void SpecialKeys(int key, int x, int y)
 // resized or moved)
 void TimerFunction(int)
 {
+    if (isAnimationPaused)
+    {
+        return;
+    }
+
     // Redraw the scene with new coordinates
     glutPostRedisplay();
-    glutTimerFunc(3, TimerFunction, 1);
+    glutTimerFunc(animationSpeed, TimerFunction, 1);
+}
+
+void HandleKeyboardEvent(unsigned char key, int, int)
+{
+    if (key == 'p' || key == 'P')
+    {
+        isAnimationPaused = !isAnimationPaused;
+        glutTimerFunc(animationSpeed, TimerFunction, 1);
+    }
 }
 
 void ChangeSize(int w, int h)
@@ -318,9 +409,10 @@ int main(int argc, char *argv[])
     glutReshapeFunc(ChangeSize);
     glutDisplayFunc(RenderScene);
     glutSpecialFunc(SpecialKeys);
+    glutKeyboardFunc(HandleKeyboardEvent);
 
     SetupRC();
-    glutTimerFunc(33, TimerFunction, 1);
+    glutTimerFunc(animationSpeed, TimerFunction, 1);
 
     glutMainLoop();
 

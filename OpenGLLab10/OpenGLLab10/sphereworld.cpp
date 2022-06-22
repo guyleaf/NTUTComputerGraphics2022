@@ -25,15 +25,18 @@ const Math3D::M3DVector4f fBrightLight = {1.0f, 1.0f, 1.0f, 1.0f};
 Math3D::M3DMatrix44f mShadowMatrix;
 
 constexpr size_t GROUND_TEXTURE = 0;
-constexpr size_t TORUS_TEXTURE = 1;
-constexpr size_t SPHERE_TEXTURE = 2;
+constexpr size_t SPHERE_TEXTURE = 1;
+constexpr size_t RECTANGLE_TEXTURE = 2;
 constexpr size_t NUM_TEXTURES = 3;
 std::array<GLuint, NUM_TEXTURES> textureObjects;
 
 const std::vector<std::string> szTextureFiles = { "grass.tga", "wood.tga", "orb.tga" };
 
 bool isAnimationPaused = false;
-constexpr int animationSpeed = 33;
+int timer = 0;
+float xTorso = 0.0f;
+int legRotationAngle = 0;
+constexpr int animationSpeed = 16;
 
 //////////////////////////////////////////////////////////////////
 // This function does any needed initialization on the rendering
@@ -155,60 +158,120 @@ void DrawGround(void)
     }
 }
 
-void drawTorso()
+void drawTorso(float cuboidS, int cuboidN)
 {
-
+    glPushMatrix();
+    glTranslatef(0.0f, -(cuboidS / 2), 0.0f);
+    glBindTexture(GL_TEXTURE_2D, textureObjects[GROUND_TEXTURE]);
+    for (int i = 0; i < cuboidN; i++)
+    {
+        glutSolidCube(cuboidS);
+        glTranslatef(0.0f, -cuboidS, 0.0f);
+    }
+    glPopMatrix();
 }
 
-void drawHead()
+void drawHead(float r)
 {
-
+    glBindTexture(GL_TEXTURE_2D, textureObjects[SPHERE_TEXTURE]);
+    gltDrawSphere(r, 100, 100);
 }
 
-void drawUpperArm()
+void drawUpperArm(float cuboidS, int cuboidN)
 {
-
+    glPushMatrix();
+    glTranslatef(0.0f, -(cuboidS / 2), 0.0f);
+    glBindTexture(GL_TEXTURE_2D, textureObjects[RECTANGLE_TEXTURE]);
+    for (int i = 0; i < cuboidN; i++)
+    {
+        glutSolidCube(cuboidS);
+        glTranslatef(0.0f, -cuboidS, 0.0f);
+    }
+    glPopMatrix();
 }
 
-void drawLowerArm()
+void drawLowerArm(float cuboidS, int cuboidN)
 {
-
+    glPushMatrix();
+    glTranslatef(0.0f, -(cuboidS / 2), 0.0f);
+    glBindTexture(GL_TEXTURE_2D, textureObjects[RECTANGLE_TEXTURE]);
+    for (int i = 0; i < cuboidN; i++)
+    {
+        glutSolidCube(cuboidS);
+        glTranslatef(0.0f, -cuboidS, 0.0f);
+    }
+    glPopMatrix();
 }
 
-void drawHand()
+void drawUpperLeg(float cuboidS, int cuboidN)
 {
-
+    glPushMatrix();
+    glTranslatef(0.0f, -(cuboidS / 2), 0.0f);
+    glBindTexture(GL_TEXTURE_2D, textureObjects[RECTANGLE_TEXTURE]);
+    for (int i = 0; i < cuboidN; i++)
+    {
+        glutSolidCube(cuboidS);
+        glTranslatef(0.0f, -cuboidS, 0.0f);
+    }
+    glPopMatrix();
 }
 
-void drawUpperLeg()
+void drawLowerLeg(float cuboidS, int cuboidN)
 {
-
-}
-
-void drawLowerLeg()
-{
-
+    glPushMatrix();
+    glTranslatef(0.0f, -(cuboidS / 2), 0.0f);
+    glBindTexture(GL_TEXTURE_2D, textureObjects[RECTANGLE_TEXTURE]);
+    for (int i = 0; i < cuboidN; i++)
+    {
+        glutSolidCube(cuboidS);
+        glTranslatef(0.0f, -cuboidS, 0.0f);
+    }
+    glPopMatrix();
 }
 
 void drawFoot()
 {
+    const float cuboidS = 0.08f;
+    const int cuboidN = 2;
 
+    glPushMatrix();
+    for (int i = 0; i < cuboidN; i++)
+    {
+        glutSolidCube(cuboidS);
+        glTranslatef(0.0f, 0.0f, -cuboidS);
+    }
+    glPopMatrix();
 }
 
-void drawArm()
+void drawArm(bool isRight)
 {
-    // r = 0.03, H x W = 0.13 * 0.04
-    drawUpperArm();
+    const float sphereR = 0.04f;
+
+    float zDirection = 1.0f;
+    if (isRight)
+    {
+        zDirection = -1.0f;
+    }
 
     glPushMatrix();
+    glTranslatef(0.0f, -sphereR, 0.0f);
+    glBindTexture(GL_TEXTURE_2D, textureObjects[SPHERE_TEXTURE]);
+    gltDrawSphere(sphereR, 100, 100);
+    if (timer <= 180)
+    {
+        glRotatef(std::min(timer, 165), 0.0f, 0.0f, zDirection);
+    }
+    else if (timer > 180)
+    {
+        glRotatef(std::max(timer, 195), 0.0f, 0.0f, -zDirection);
+    }
+    glTranslatef(0.0f, -sphereR, 0.0f);
+    // W x H = 0.08 * 0.16
+    drawUpperArm(0.08f, 2);
     glTranslatef(0.0f, -0.16f, 0.0f);
-    // r = 0.03, H x W = 0.13 * 0.04
-    drawLowerArm();
+    // r = 0.03, H x W = 0.12 * 0.04
+    drawLowerArm(0.1f, 2);
 
-    glPushMatrix();
-    glTranslatef(0.0f, -0.13f, 0.0f);
-    drawHand();
-    glPopMatrix();
     glPopMatrix();
 }
 
@@ -219,20 +282,39 @@ void drawButtock()
     glEnd();
 }
 
-void drawLeg()
+void drawLeg(bool isRight)
 {
-    // r = 0.03, H x W = 0.13 * 0.04
-    drawUpperLeg();
+    const float sphereR = 0.04f;
+
+    float xDirection = 1.0f;
+    if (isRight)
+    {
+        xDirection = -1.0f;
+    }
 
     glPushMatrix();
+    glTranslatef(0.0f, -sphereR, 0.0f);
+    glBindTexture(GL_TEXTURE_2D, textureObjects[SPHERE_TEXTURE]);
+    gltDrawSphere(sphereR, 100, 100);
+    if (legRotationAngle <= 150)
+    {
+        glRotatef(75 - legRotationAngle, -xDirection, 0.0f, 0.0f);
+    }
+    else
+    {
+        glRotatef(225 - legRotationAngle, xDirection, 0.0f, 0.0f);
+    }
+    glTranslatef(0.0f, -sphereR, 0.0f);
+
+    // r = 0.03, H x W = 0.16 * 0.08
+    drawUpperLeg(0.08f, 2);
+
     glTranslatef(0.0f, -0.16f, 0.0f);
-    // r = 0.03, H x W = 0.13 * 0.04
-    drawLowerLeg();
+    // r = 0.03, H x W = 0.18 * 0.06
+    drawLowerLeg(0.06f, 3);
 
-    glPushMatrix();
-    glTranslatef(0.0f, -0.13f, 0.0f);
-    drawLeg();
-    glPopMatrix();
+    glTranslatef(0.0f, -0.18f, 0.0f);
+    drawFoot();
     glPopMatrix();
 }
 
@@ -247,45 +329,50 @@ void drawRobot(bool drawShadow)
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
+    // Move forward
+    glTranslatef(0.0f, 0.0f, -2.5f);
+    glRotatef(180.0f + timer, 0.0f, 1.0f, 0.0f);
+    glTranslatef(xTorso, 0.0f, 0.0f);
+
+#pragma region Arm Body Head
     glPushMatrix();
 
-    glTranslatef(0.0f, 0.2f, 0.0f);
-    // H x W = 0.2 * 0.1
-    drawTorso();
+    glTranslatef(0.0f, 0.4f, 0.0f);
+    // H x W = 0.4 * 0.2
+    drawTorso(0.2f, 2);
 
     glPushMatrix();
-    glTranslatef(0.0f, 0.05f, 0.0f);
-    // r = 0.05
-    drawHead();
+    glTranslatef(0.0f, 0.08f, 0.0f);
+    // r = 0.08
+    drawHead(0.08f);
     glPopMatrix();
 
     // right arm
     glPushMatrix();
-    glTranslatef(-0.08f, 0.0f, 0.0f);
-    drawArm();
+    glTranslatef(-0.15f, 0.0f, 0.0f);
+    drawArm(true);
     glPopMatrix();
 
     // left arm
     glPushMatrix();
-    glTranslatef(0.08f, 0.0f, 0.0f);
-    drawArm();
+    glTranslatef(0.15f, 0.0f, 0.0f);
+    drawArm(false);
     glPopMatrix();
 
     glPopMatrix();
+#pragma endregion
 
     glPushMatrix();
-    drawButtock();
-
     // right leg
     glPushMatrix();
-    glTranslatef(-0.03f, 0.0f, 0.0f);
-    drawLeg();
+    glTranslatef(-0.05f, 0.0f, 0.0f);
+    drawLeg(true);
     glPopMatrix();
 
     // left leg
     glPushMatrix();
-    glTranslatef(0.03f, 0.0f, 0.0f);
-    drawLeg();
+    glTranslatef(0.05f, 0.0f, 0.0f);
+    drawLeg(false);
     glPopMatrix();
     glPopMatrix();
 }
@@ -363,6 +450,10 @@ void TimerFunction(int)
     {
         return;
     }
+
+    legRotationAngle = (legRotationAngle + 1) % 300;
+    timer = (timer + 1) % 360;
+    xTorso = xTorso + 0.0005f;
 
     // Redraw the scene with new coordinates
     glutPostRedisplay();

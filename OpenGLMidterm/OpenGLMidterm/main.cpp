@@ -43,7 +43,7 @@ void rasterizePolygons();
 bool isDrawing();
 bool isInSameGridCell(const Graph2D::Vertex&, const Graph2D::Vertex&);
 double getGridBoundary();
-Graph2D::Vertex convertWindowCoordinateToWorldCoordinate(const int&, const int&);
+Graph2D::Vertex createVertex(const int&, const int&);
 void printMouseMessage(const double&, const double&);
 
 enum class RasterizationMode
@@ -92,7 +92,9 @@ void initializeAlgorithms()
         const double leftX = centerX - CELL_HALF_SIZE;
         const double rightX = centerX + CELL_HALF_SIZE;
 
-        glColor4d(centerVertex.getRed(), centerVertex.getGreen(), centerVertex.getBlue(), centerVertex.getAlpha());
+        const std::array<double, 4> color = centerVertex.getRGBA();
+        glColor4d(color[0], color[1], color[2], color[3]);
+
         glBegin(GL_QUADS);
         glVertex2d(leftX, topY);
         glVertex2d(rightX, topY);
@@ -139,7 +141,7 @@ int main(int argc, char **argv)
 /// <param name="y"></param>
 void handleMouseMotionEvent(int x, int y)
 {
-    const auto point = convertWindowCoordinateToWorldCoordinate(x, y);
+    const auto point = createVertex(x, y);
     mouseX = point.getX();
     mouseY = point.getY();
 
@@ -161,7 +163,7 @@ void handleMouseEvent(int button, int state, int x, int y)
 {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
     {
-        const auto point = convertWindowCoordinateToWorldCoordinate(x, y);
+        const auto point = createVertex(x, y);
 
         // Check if the point and the first selected point are in the same grid cell
         if (isDrawing() && isInSameGridCell(point, selectedPoints.front()))
@@ -420,7 +422,7 @@ double getGridBoundary()
 /// <param name="x"></param>
 /// <param name="y"></param>
 /// <returns></returns>
-Graph2D::Vertex convertWindowCoordinateToWorldCoordinate(const int& x, const int& y)
+Graph2D::Vertex createVertex(const int& x, const int& y)
 {
     const double size = getGridBoundary();
     const double worldX = (2.0 * static_cast<double>(x) / WINDOW_WIDTH - 1.0) * size;

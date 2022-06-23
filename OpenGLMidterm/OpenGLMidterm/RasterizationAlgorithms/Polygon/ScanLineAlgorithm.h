@@ -19,7 +19,7 @@ namespace RasterizationAlgorithms
         class Edge;
 
         void scanXY(const std::vector<Graph2D::Vertex>& vList, size_t iMin) const;
-        void scanX(const std::vector<Graph2D::Vertex>& vList, const size_t& li, const size_t& ri, Edge& lEdge, Edge& rEdge, int& scanLineY) const;
+        void scanX(const Edge& lEdge, const Edge& rEdge, int y) const;
 
         void findEdge(const std::vector<Graph2D::Vertex>& vList, size_t& rem, size_t& iVertex, Edge& edge, int scanLineY, bool leftOrRight) const;
 
@@ -29,7 +29,7 @@ namespace RasterizationAlgorithms
         void differenceY(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Edge& edge, int y) const;
         void difference(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Edge& edge, double diff, double amountOfStep) const;
 
-        size_t findIndexWithSmallestY(const std::vector<Graph2D::Vertex>& vertices) const;
+        size_t findSmallestYIndex(const std::vector<Graph2D::Vertex>& vertices) const;
 
         // ¿À¨d vertices order is countclockwise order
         bool isVerticesStoredInCounterclockwiseOrder(const std::vector<Graph2D::Vertex>& vertices) const;

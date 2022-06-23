@@ -31,7 +31,7 @@ namespace RasterizationAlgorithms
             vList.assign(vertices.rbegin(), vertices.rend());
         }
 
-        size_t&& iMin = findIndexWithSmallestY(vList);
+        size_t iMin = findSmallestYIndex(vList);
         scanXY(vList, iMin);
     }
 
@@ -56,38 +56,43 @@ namespace RasterizationAlgorithms
             findEdge(vList, rem, li, lEdge, scanLineY, false);
             // right
             findEdge(vList, rem, ri, rEdge, scanLineY, true);
+
+            // rasterization
+            int&& ly = static_cast<int>(std::ceil(vList[li].getY()));
+            int&& ry = static_cast<int>(std::ceil(vList[ri].getY()));
+            while (scanLineY < ly && scanLineY < ry)
+            {
+                scanX(lEdge, rEdge, scanLineY);
+                increment(lEdge);
+                increment(rEdge);
+                scanLineY++;
+            }
         }
     }
 
-    void ScanLineAlgorithm::scanX(const std::vector<Graph2D::Vertex>& vList, const size_t& li, const size_t& ri, Edge& lEdge, Edge& rEdge, int& scanLineY) const
+    void ScanLineAlgorithm::scanX(const Edge& lEdge, const Edge& rEdge, int y) const
     {
-        int&& ly = static_cast<int>(std::ceil(vList[li].getY()));
-        int&& ry = static_cast<int>(std::ceil(vList[ri].getY()));
+        auto lx = static_cast<int>(std::ceil(lEdge.position.getX()));
+        auto rx = static_cast<int>(std::ceil(rEdge.position.getX()));
 
-        while (scanLineY < ly && scanLineY < ry)
+        Edge hEdge;
+
+        if (lx < rx)
         {
-            int&& lx = static_cast<int>(std::ceil(vList[li].getX()));
-            int&& rx = static_cast<int>(std::ceil(vList[ri].getX()));
-
-            if (lx < rx)
+            // get interpolated color
+            differenceX(lEdge.position, rEdge.position, hEdge, lx);
+            for (int x = lx; x < rx; x++)
             {
-                // diff
-                for (int x = lx; x < rx; x++)
-                {
-                    _setPixel(Graph2D::Vertex(x, scanLineY, 1.0, 0.0, 0.0, 1.0));
-                    // increment
-                }
+                _setPixel(Graph2D::Vertex(x, y, hEdge.position.getRGBA()));
+                // update interpolated color
+                increment(hEdge);
             }
-
-            increment(lEdge);
-            increment(rEdge);
-            scanLineY++;
         }
     }
 
     void ScanLineAlgorithm::findEdge(const std::vector<Graph2D::Vertex>& vList, size_t& rem, size_t& iVertex, Edge& edge, int scanLineY, bool leftOrRight) const
     {
-        size_t&& n{ vList.size() };
+        size_t n{ vList.size() };
 
         // traverse vList based on finding the left or right edge
         std::function<size_t(const size_t&)> next;
@@ -109,7 +114,7 @@ namespace RasterizationAlgorithms
         }
 
         size_t i;
-        int&& y = static_cast<int>(std::ceil(vList[iVertex].getY()));
+        auto y = static_cast<int>(std::ceil(vList[iVertex].getY()));
 
         while (y <= scanLineY && rem > 0)
         {
@@ -127,29 +132,45 @@ namespace RasterizationAlgorithms
 
     void ScanLineAlgorithm::increment(Edge& edge) const
     {
-        edge.position.setX(edge.position.getX() + edge.difference.getX());
+        Graph2D::Vertex& point = edge.position;
+        const Graph2D::Vertex& dPoint = edge.difference;
+        point.setX(point.getX() + dPoint.getX());
+        point.setRGBA(std::array<double, 4> {point.getRed() + dPoint.getRed(), point.getGreen() + dPoint.getGreen(), point.getBlue() + dPoint.getBlue(), 1.0});
     }
 
     void ScanLineAlgorithm::differenceX(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Edge& edge, int x) const
     {
-        double&& startX = startVertex.getX();
+        const double startX = startVertex.getX();
         difference(startVertex, endVertex, edge, (endVertex.getX() - startX), x - startX);
     }
 
     void ScanLineAlgorithm::differenceY(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Edge& edge, int y) const
     {
-        double&& startY = startVertex.getY();
+        const double startY = startVertex.getY();
         difference(startVertex, endVertex, edge, (endVertex.getY() - startY), y - startY);
     }
 
     void ScanLineAlgorithm::difference(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Edge& edge, double diff, double amountOfStep) const
     {
-        double&& deX = (endVertex.getX() - startVertex.getX()) / diff;
-        edge.difference.setX(deX);
-        edge.position.setX(startVertex.getX() + amountOfStep * deX);
+        Graph2D::Vertex& edgePoint = edge.position;
+        Graph2D::Vertex& dEdgePoint = edge.difference;
+
+        const double startX = startVertex.getX();
+        const std::array<double, 4> startColor = startVertex.getRGBA();
+        const std::array<double, 4> endColor = startVertex.getRGBA();
+
+        double deX = (endVertex.getX() - startX) / diff;
+        double deR = (endColor[0] - startColor[0]) / diff;
+        double deG = (endColor[1] - startColor[1]) / diff;
+        double deB = (endColor[2] - startColor[2]) / diff;
+
+        dEdgePoint.setX(deX);
+        edgePoint.setX(startX + amountOfStep * deX);
+        dEdgePoint.setRGBA(std::array<double, 4> {deR, deG, deB, 1.0});
+        edgePoint.setRGBA(std::array<double, 4> {startColor[0] + amountOfStep * deR, startColor[1] + amountOfStep * deG, startColor[2] + amountOfStep * deB, 1.0});
     }
 
-    size_t ScanLineAlgorithm::findIndexWithSmallestY(const std::vector<Graph2D::Vertex>& vertices) const
+    size_t ScanLineAlgorithm::findSmallestYIndex(const std::vector<Graph2D::Vertex>& vertices) const
     {
         size_t iMin = 0;
         for (size_t i = 1; i < vertices.size(); i++)

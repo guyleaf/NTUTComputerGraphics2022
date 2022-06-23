@@ -165,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graph2d.h" />
+    <ClInclude Include="Graph2D\Edge.h" />
     <ClInclude Include="Graph2D\Polygon.h" />
     <ClInclude Include="Graph2D\Vertex.h" />
     <ClInclude Include="rasterizationAlgorithms.h" />

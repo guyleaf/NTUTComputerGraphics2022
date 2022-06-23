@@ -6,6 +6,7 @@
 #include <string>
 #include <functional>
 #include <utility>
+#include <random>
 #include <GL/freeglut.h>
 
 #include "graph2d.h"
@@ -67,7 +68,7 @@ double mouseX;
 double mouseY;
 
 
-const std::array<std::string, 2> RASTERIZATION_MODE_NAMES = { "Line", "Graph2D" };
+const std::array<std::string, 2> RASTERIZATION_MODE_NAMES = { "Line", "Polygon" };
 // Grid size menu options
 const std::array<int, 5> GRID_SIZES = {10, 15, 20, 25, 30};
 
@@ -75,6 +76,9 @@ const std::array<int, 5> GRID_SIZES = {10, 15, 20, 25, 30};
 const std::array<GLfloat, 4> ENV_AMBIENT_COLOR = {0.45f, 0.45f, 0.45f, 1.0f};
 const std::array<GLfloat, 4> SOURCE_COLOR = {0.25f, 0.25f, 0.25f, 1.0f};
 const std::array<GLfloat, 4> LIGHT_POSITION = {0.f, 25.0f, 20.0f, 0.0f};
+
+std::random_device RANDOM_DEVICE;
+std::uniform_real_distribution<double> COLOR_RANGE(0.0, 1.0);
 
 /// <summary>
 /// 初始化演算法
@@ -417,7 +421,7 @@ double getGridBoundary()
 }
 
 /// <summary>
-/// 轉換 Window 座標至 World 座標
+/// 建立 Vertex
 /// </summary>
 /// <param name="x"></param>
 /// <param name="y"></param>
@@ -427,7 +431,7 @@ Graph2D::Vertex createVertex(const int& x, const int& y)
     const double size = getGridBoundary();
     const double worldX = (2.0 * static_cast<double>(x) / WINDOW_WIDTH - 1.0) * size;
     const double worldY = (1.0 - 2.0 * static_cast<double>(y) / WINDOW_HEIGHT) * size;
-    return Graph2D::Vertex(worldX, worldY);
+    return Graph2D::Vertex(worldX, worldY, COLOR_RANGE(RANDOM_DEVICE), COLOR_RANGE(RANDOM_DEVICE), COLOR_RANGE(RANDOM_DEVICE), 1.0);
 }
 
 /// <summary>

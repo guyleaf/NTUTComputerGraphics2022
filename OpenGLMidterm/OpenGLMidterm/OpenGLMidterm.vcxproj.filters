@@ -95,5 +95,8 @@
     <ClInclude Include="Graph2D\Vertex.h">
       <Filter>標頭檔\Graph2D</Filter>
     </ClInclude>
+    <ClInclude Include="Graph2D\Edge.h">
+      <Filter>標頭檔\Graph2D</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

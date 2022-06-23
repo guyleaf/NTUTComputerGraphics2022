@@ -3,7 +3,7 @@
 #include <utility>
 #include <functional>
 
-#include "../../Graph2D/Vertex.h"
+#include "../../Graph2D/Edge.h"
 #include "../LineAlgorithm.h"
 
 namespace RasterizationAlgorithms
@@ -24,13 +24,16 @@ namespace RasterizationAlgorithms
         // 處理斜率為負的線段
         void rasterizeLineInNegativeSlope(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, const double& slope) const;
 
+        // calculate interpolated color
+        void increment(Graph2D::Edge& edge) const;
+        void differenceX(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Graph2D::Edge& edge) const;
+        void differenceY(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Graph2D::Edge& edge) const;
+        void difference(const Graph2D::Vertex& startVertex, const Graph2D::Vertex& endVertex, Graph2D::Edge& edge, double diff) const;
+
         // 畫格子
         const std::function<void(const Graph2D::Vertex&)> _setPixel;
 
         // 演算法名稱
         const std::string _name{ "anti-aliasing" };
-
-        // default pixel color
-        const std::array<double, 4> _color{ 0.5, 0.5, 0.5, 1.0 };
     };
 }

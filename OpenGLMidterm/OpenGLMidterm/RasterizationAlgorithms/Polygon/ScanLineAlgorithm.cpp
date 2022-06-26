@@ -37,12 +37,9 @@ namespace RasterizationAlgorithms
 
     void ScanLineAlgorithm::scanXY(const std::vector<Graph2D::Vertex>& vList, size_t iMin) const
     {
-        Graph2D::Edge lEdge;
-        Graph2D::Edge rEdge;
-
-        // left & right upper endpoint indices
-        size_t li{ iMin };
-        size_t ri{ iMin };
+        std::vector<Graph2D::Edge> edges;
+        // upper endpoint indices
+        std::vector<size_t> iVertices{ iMin, iMin };
 
         // number of remaining vertices
         size_t rem{ vList.size() };
@@ -53,9 +50,9 @@ namespace RasterizationAlgorithms
         while (rem > 0)
         {
             // left
-            findEdge(vList, rem, li, lEdge, scanLineY, false);
+            findEdge(vList, rem, li, edges, scanLineY, false);
             // right
-            findEdge(vList, rem, ri, rEdge, scanLineY, true);
+            findEdge(vList, rem, ri, edges, scanLineY, true);
 
             // rasterization
             int&& ly = static_cast<int>(std::ceil(vList[li].getY()));

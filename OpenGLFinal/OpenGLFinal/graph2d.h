@@ -10,5 +10,8 @@ namespace Graph2D
     {
         std::vector<Graph2D::Vertex> points;
         std::vector<std::array<size_t, 3>> faces;
+
+        Graph2D::Vertex upperFrontLeftPoint;
+        Graph2D::Vertex lowerBackRightPoint;
     };
 }

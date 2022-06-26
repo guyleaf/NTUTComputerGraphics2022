@@ -23,11 +23,13 @@ namespace Graph2D
 
         while (!ifs.eof())
         {
-            int&& code = ifs.peek();
+            int code = ifs.peek();
 
             if (code == 'v')
             {
-                polygon.points.push_back(parseVertex(ifs));
+                auto&& point = parseVertex(ifs);
+                updateBounding(polygon, point);
+                polygon.points.push_back(point);
             }
             else if (code == 'f')
             {
@@ -56,7 +58,7 @@ namespace Graph2D
         ifs.getline(tmp, 256, ' ');
         point.setY(std::stof(tmp));
         ifs.getline(tmp, 256, '\n');
-        point.setX(std::stof(tmp));
+        point.setZ(std::stof(tmp));
 
         return point;
     }
@@ -79,5 +81,50 @@ namespace Graph2D
         face3 = std::stoul(tmp);
 
         return std::array<size_t, 3>{face1, face2, face3};
+    }
+
+    void ObjLoader::updateBounding(Graph2D::Polygon& polygon, Graph2D::Vertex point) const
+    {
+        const float x = point.getX();
+        const float y = point.getY();
+        const float z = point.getZ();
+
+        Graph2D::Vertex *boundingPoint = &polygon.upperFrontLeftPoint;
+        float oldX = boundingPoint->getX();
+        float oldY = boundingPoint->getY();
+        float oldZ = boundingPoint->getZ();
+
+        // check if new point is out of the current upper front left bounding point
+        if (x < oldX)
+        {
+            boundingPoint->setX(x);
+        }
+        if (y > oldY)
+        {
+            boundingPoint->setY(y);
+        }
+        if (z > oldZ)
+        {
+            boundingPoint->setZ(z);
+        }
+
+        boundingPoint = &polygon.lowerBackRightPoint;
+        oldX = boundingPoint->getX();
+        oldY = boundingPoint->getY();
+        oldZ = boundingPoint->getZ();
+
+        // check if new point is out of the current lower back right bounding point
+        if (x > oldX)
+        {
+            boundingPoint->setX(x);
+        }
+        if (y < oldY)
+        {
+            boundingPoint->setY(y);
+        }
+        if (z < oldZ)
+        {
+            boundingPoint->setZ(z);
+        }
     }
 };

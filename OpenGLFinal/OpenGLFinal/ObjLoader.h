@@ -14,6 +14,7 @@ namespace Graph2D
     private:
         Graph2D::Vertex parseVertex(std::ifstream& ifs) const;
         std::array<size_t, 3> parseFace(std::ifstream& ifs) const;
+        void updateBounding(Graph2D::Polygon& polygon, Graph2D::Vertex point) const;
 
         std::string _fileName;
     };

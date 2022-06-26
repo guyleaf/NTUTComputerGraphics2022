@@ -22,31 +22,82 @@ enum class ColorModes
 const std::array<std::string, 3> RENDER_MODES{ "Point", "Line", "Face" };
 const std::array<std::string, 2> COLOR_MODES{ "Single Color", "Random Colors" };
 
+constexpr int ANIMATION_SPEED = 16;
+
 Graph2D::Polygon polygon;
 bool isObjLoaded = false;
 ColorModes colorMode = ColorModes::Single;
 bool showBoundingBox = false;
+bool pauseAnimation = false;
+
+float angle = 0;
+
+void drawObjModel()
+{
+    for (const auto& face : polygon.faces)
+    {
+        glColor3f(1.0f, 1.0f, 1.0f);
+        glBegin(GL_TRIANGLES);
+        for (size_t i : face)
+        {
+            const auto& point = polygon.points[i - 1];
+            glVertex3f(point.getX(), point.getY(), point.getZ());
+        }
+        glEnd();
+    }
+}
+
+void drawBoundingBox()
+{
+    const auto& upperFrontLeftPoint = polygon.upperFrontLeftPoint;
+    const auto& lowerBackRightPoint = polygon.lowerBackRightPoint;
+
+    const float upperFrontLeftX = upperFrontLeftPoint.getX();
+    const float upperFrontLeftY = upperFrontLeftPoint.getY();
+    const float upperFrontLeftZ = upperFrontLeftPoint.getZ();
+    const float lowerBackRightX = lowerBackRightPoint.getX();
+    const float lowerBackRightY = lowerBackRightPoint.getY();
+    const float lowerBackRightZ = lowerBackRightPoint.getZ();
+
+    glPushMatrix();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glBegin(GL_QUAD_STRIP);
+    glVertex3f(upperFrontLeftX, upperFrontLeftY, upperFrontLeftZ);
+    glVertex3f(upperFrontLeftX, lowerBackRightY, upperFrontLeftZ);
+    glVertex3f(lowerBackRightX, upperFrontLeftY, upperFrontLeftZ);
+    glVertex3f(lowerBackRightX, lowerBackRightY, upperFrontLeftZ);
+
+    glVertex3f(lowerBackRightX, upperFrontLeftY, lowerBackRightZ);
+    glVertex3f(lowerBackRightX, lowerBackRightY, lowerBackRightZ);
+
+    glVertex3f(upperFrontLeftX, upperFrontLeftY, lowerBackRightZ);
+    glVertex3f(upperFrontLeftX, lowerBackRightY, lowerBackRightZ);
+
+    glVertex3f(upperFrontLeftX, upperFrontLeftY, upperFrontLeftZ);
+    glVertex3f(upperFrontLeftX, lowerBackRightY, upperFrontLeftZ);
+
+    glEnd();
+    glPopMatrix();
+}
 
 void renderScene()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(0.0f, 0.0f, 10.0f, 0, 0, 0, 0, 1, 0);
+
+    glRotatef(angle, 0.0f, 1.0f, 0.0f);
 
     if (isObjLoaded)
     {
-        for (const auto& face: polygon.faces)
-        {
-            glColor3f(1.0f, 1.0f, 1.0f);
-            glBegin(GL_POLYGON);
-            for (size_t i: face)
-            {
-                const auto& point = polygon.points[i - 1];
-                glVertex3f(point.getX(), point.getY(), point.getZ());
-            }
-            glEnd();
-        }
+        drawObjModel();
     }
-
+    if (showBoundingBox)
+    {
+        drawBoundingBox();
+    }
     glutSwapBuffers();
 }
 
@@ -73,10 +124,6 @@ void changeSize(int w, int h)
 
     // Set the clipping volume
     gluPerspective(35.0f, fAspect, 1.0f, 50.0f);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(0.0f, 0.0f, 10.0f, 0, 0, 0, 0, 1, 0);
 }
 
 void setupRC()
@@ -85,7 +132,7 @@ void setupRC()
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_DEPTH_TEST);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void handleFileMenuOnSelect(int option)
@@ -149,6 +196,33 @@ void buildPopupMenu()
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
+void timerFunction(int)
+{
+    if (pauseAnimation)
+    {
+        return;
+    }
+
+    angle++;
+    if (angle >= 360)
+    {
+        angle = 0;
+    }
+
+    // Redraw the scene with new coordinates
+    glutPostRedisplay();
+    glutTimerFunc(ANIMATION_SPEED, timerFunction, 1);
+}
+
+void handleKeyboardEvent(unsigned char key, int, int)
+{
+    if (key == 'p' || key == 'P')
+    {
+        pauseAnimation = !pauseAnimation;
+        glutTimerFunc(ANIMATION_SPEED, timerFunction, 1);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     if (argc > 1)
@@ -171,9 +245,11 @@ int main(int argc, char* argv[])
     glutCreateWindow("Model Viewer");
     glutReshapeFunc(changeSize);
     glutDisplayFunc(renderScene);
+    glutKeyboardFunc(handleKeyboardEvent);
 
     setupRC();
     buildPopupMenu();
+    glutTimerFunc(ANIMATION_SPEED, timerFunction, 1);
 
     glutMainLoop();
     return 0;

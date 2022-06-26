@@ -15,7 +15,7 @@ namespace Graph2D
     {
     }
 
-    double Vertex::getX() const
+    float Vertex::getX() const
     {
         return _x;
     }
@@ -25,7 +25,7 @@ namespace Graph2D
         _x = value;
     }
 
-    double Vertex::getY() const
+    float Vertex::getY() const
     {
         return _y;
     }
@@ -35,7 +35,7 @@ namespace Graph2D
         _y = value;
     }
 
-    double Vertex::getZ() const
+    float Vertex::getZ() const
     {
         return _z;
     }

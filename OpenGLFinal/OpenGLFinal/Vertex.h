@@ -10,13 +10,13 @@ namespace Graph2D
 		Vertex();
 		Vertex(float x, float y, float z);
 
-		double getX() const;
+		float getX() const;
 		void setX(float);
 
-		double getY() const;
+		float getY() const;
 		void setY(float);
 
-		double getZ() const;
+		float getZ() const;
 		void setZ(float);
 
 		friend bool operator==(const Vertex&, const Vertex&);

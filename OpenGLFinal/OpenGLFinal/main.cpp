@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <random>
 
 #include "ObjLoader.h"
 #include "graph2d.h"
@@ -11,6 +12,13 @@ const std::array<std::pair<std::string, std::string>, 4> FILES{
     std::make_pair("octahedron", "resources/octahedron.obj"),
     std::make_pair("teapot", "resources/teapot.obj"),
     std::make_pair("teddy", "resources/teddy.obj")
+};
+
+enum class RenderModes
+{
+    Point,
+    Line,
+    Face
 };
 
 enum class ColorModes
@@ -25,18 +33,20 @@ const std::array<std::string, 2> COLOR_MODES{ "Single Color", "Random Colors" };
 constexpr int ANIMATION_SPEED = 16;
 
 Graph2D::Polygon polygon;
-bool isObjLoaded = false;
-ColorModes colorMode = ColorModes::Single;
+std::array<float, 3> polygonColor{ 1.0f, 1.0f, 1.0f};
+RenderModes renderMode = RenderModes::Line;
 bool showBoundingBox = false;
 bool pauseAnimation = false;
 
 float angle = 0;
+std::random_device RANDOM_DEVICE;
+std::uniform_real_distribution<float> COLOR_RANGE(0.0f, 1.0f);
 
 void drawObjModel()
 {
     for (const auto& face : polygon.faces)
     {
-        glColor3f(1.0f, 1.0f, 1.0f);
+        glColor3f(polygonColor[0], polygonColor[1], polygonColor[2]);
         glBegin(GL_TRIANGLES);
         for (size_t i : face)
         {
@@ -60,6 +70,7 @@ void drawBoundingBox()
     const float lowerBackRightZ = lowerBackRightPoint.getZ();
 
     glPushMatrix();
+    glColor3f(1.0f, 1.0f, 1.0f);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glBegin(GL_QUAD_STRIP);
     glVertex3f(upperFrontLeftX, upperFrontLeftY, upperFrontLeftZ);
@@ -90,10 +101,8 @@ void renderScene()
 
     glRotatef(angle, 0.0f, 1.0f, 0.0f);
 
-    if (isObjLoaded)
-    {
-        drawObjModel();
-    }
+    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT + static_cast<int>(renderMode));
+    drawObjModel();
     if (showBoundingBox)
     {
         drawBoundingBox();
@@ -131,27 +140,34 @@ void setupRC()
     // Enable color tracking
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_DEPTH_TEST);
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void handleFileMenuOnSelect(int option)
 {
-    isObjLoaded = true;
     loadObj(FILES[option].second);
-
     glutPostRedisplay();
 }
 
 void handleRenderModeMenuOnSelect(int option)
 {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT + option);
+    renderMode = static_cast<RenderModes>(option);
     glutPostRedisplay();
 }
 
 void handleColorModeMenuOnSelect(int option)
 {
-    colorMode = static_cast<ColorModes>(option);
+    auto colorMode = static_cast<ColorModes>(option);
+    switch (colorMode)
+    {
+    case ColorModes::Single:
+        polygonColor = std::array<float, 3>{ 1.0f, 1.0f, 1.0f};
+        break;
+    case ColorModes::Random:
+        polygonColor = std::array<float, 3>{ COLOR_RANGE(RANDOM_DEVICE), COLOR_RANGE(RANDOM_DEVICE), COLOR_RANGE(RANDOM_DEVICE)};
+        break;
+    default:
+        break;
+    }
     glutPostRedisplay();
 }
 
@@ -230,7 +246,6 @@ int main(int argc, char* argv[])
         if (strlen(argv[1]) != 0)
         {
             loadObj(argv[1]);
-            isObjLoaded = true;
         }
         else
         {

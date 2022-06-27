@@ -22,7 +22,7 @@
 
    #### Release 建置專案
 
-   1. 建置專案後，去 x64/Release 底下複製 OpenGLFinal.exe 至[這裡](OpenGLFinal) (必須複製到 resources 資料夾的上一層，不然會造成 obj 找不到檔案的錯誤)
+   1. 建置專案後，去 x64/Release 底下複製 OpenGLFinal.exe 至 resources 資料夾的上一層，否則會造成 obj 找不到檔案的錯誤
    2. 直接點開 exe 或打開 cmd 輸入 `OpenGLFinal.exe {你想要載入的 obj 檔案}`
       例如: `OpenGLFinal.exe resources/teapot.obj`
 

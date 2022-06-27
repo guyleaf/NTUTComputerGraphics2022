@@ -34,37 +34,40 @@
 ### 選單
 
 1. File 選單，可選擇載入內建四種模型檔案 (因內建的 Open File... 的 dialog 是限定 Windows 平台使用，所以就沒多實作可選擇其他檔案)
-   ![image-20220627210345935](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627210345935.png)
+   ![image-20220627210345935](image-20220627210345935.png)
 
 2. Render Mode 選單，可選擇 Point、Line、Face 三種模型呈現方式
-   ![image-20220627210528777](C:\Users\ychhu\AppData\Roaming\Typora\typora-user-images\image-20220627210528777.png)
+   ![image-20220627210528777](image-20220627210528777.png)
 
 3. Color Mode 選單，可選擇 Fixed Color (White)、Random Color (每點一次 randomize 一次)
-   ![image-20220627210630775](C:\Users\ychhu\AppData\Roaming\Typora\typora-user-images\image-20220627210630775.png)
+   ![image-20220627210630775](image-20220627210630775.png)
 
 4. Bounding Box 開關，是否顯示 bounding box
-   ![image-20220627210702425](C:\Users\ychhu\AppData\Roaming\Typora\typora-user-images\image-20220627210702425.png)
+   ![image-20220627210702425](image-20220627210702425.png)
 
 ## 截圖、影片
 
 * Line
-  ![image-20220627213319436](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627213319436.png)
+  ![image-20220627213319436](image-20220627213319436.png)
 * Point
-  ![image-20220627213335496](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627213335496.png)
+  ![image-20220627213335496](image-20220627213335496.png)
 * Face
-  ![image-20220627213757258](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627213757258.png)
+  ![image-20220627213757258](image-20220627213757258.png)
 
 * Random Color
 
-  ![image-20220627213409517](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627213409517.png)![image-20220627213427705](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627213459799.png)
+  ![image-20220627213409517](image-20220627213409517.png)
+  ![image-20220627213427705](image-20220627213459799.png)
 
 * Bounding Box
 
-  ![image-20220627213529215](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627213529215.png)![image-20220627213540963](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627213540963.png)![image-20220627213600959](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627213600959.png)
+  ![image-20220627213529215](image-20220627213529215.png)
+  ![image-20220627213540963](image-20220627213540963.png)
+  ![image-20220627213600959](image-20220627213600959.png)
 
 * Command Line 載入指定 obj 檔案
 
-  ![image-20220627214016575](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627214016575.png)
+  ![image-20220627214016575](image-20220627214016575.png)
 
 * 動畫開始/暫停、自動縮放模型至合適大小，[影片](https://youtu.be/s3fVi9ZTtNE)
 
@@ -79,9 +82,9 @@
   * ⭕使用 glScalef 與搭配找到的 bounding box，計算 scale factor。
     原本沒想那麼多，直接依照三邊長與要映射的大小(targetSize)相除後，再個別丟入對應的 glScalef 參數，但這會造成 object 縮放變形，因為沒有等比例縮放。例如下圖，teapot 變形
     
-    ![image-20220627215503696](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627215503696.png)
+    ![image-20220627215503696](image-20220627215503696.png)
     
     所以正確解法是: 求出 width, height, depth -> 找出三邊中的最大值 -> 與 targetSize 相除，統一求出共同的 scale factor。
     
-    ![image-20220627215552232](E:\Git\NTUTComputerGraphics2022\OpenGLFinal\Docs\image-20220627215552232.png)
+    ![image-20220627215552232](image-20220627215552232.png)
 

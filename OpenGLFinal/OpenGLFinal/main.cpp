@@ -31,6 +31,7 @@ const std::array<std::string, 3> RENDER_MODES{ "Point", "Line", "Face" };
 const std::array<std::string, 2> COLOR_MODES{ "Single Color", "Random Colors" };
 
 constexpr int ANIMATION_SPEED = 16;
+constexpr float OBJECT_VIEW_SIZE = 5.0f;
 
 Graph2D::Polygon polygon;
 std::array<float, 3> polygonColor{ 1.0f, 1.0f, 1.0f};
@@ -38,14 +39,22 @@ RenderModes renderMode = RenderModes::Line;
 bool showBoundingBox = false;
 bool pauseAnimation = false;
 
+float fov = 50.0f;
 float angle = 0;
 std::random_device RANDOM_DEVICE;
 std::uniform_real_distribution<float> COLOR_RANGE(0.0f, 1.0f);
 
 void drawObjModel()
 {
+    const float width = std::abs(polygon.lowerBackRightPoint.getX() - polygon.upperFrontLeftPoint.getX());
+    const float height = std::abs(polygon.upperFrontLeftPoint.getY() - polygon.lowerBackRightPoint.getY());
+    const float depth = std::abs(polygon.upperFrontLeftPoint.getZ() - polygon.lowerBackRightPoint.getZ());
+    const float scaleFactor = OBJECT_VIEW_SIZE / std::max(std::max(width, height), depth);
+
+    glScalef(scaleFactor, scaleFactor, scaleFactor);
     for (const auto& face : polygon.faces)
     {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_POINT + static_cast<int>(renderMode));
         glColor3f(polygonColor[0], polygonColor[1], polygonColor[2]);
         glBegin(GL_TRIANGLES);
         for (size_t i : face)
@@ -97,16 +106,17 @@ void renderScene()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(0.0f, 0.0f, 10.0f, 0, 0, 0, 0, 1, 0);
+    gluLookAt(0.0f, 0.0f, OBJECT_VIEW_SIZE + 3.0f, 0, 0, 0, 0, 1, 0);
 
+    glPushMatrix();
     glRotatef(angle, 0.0f, 1.0f, 0.0f);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT + static_cast<int>(renderMode));
     drawObjModel();
     if (showBoundingBox)
     {
         drawBoundingBox();
     }
+    glPopMatrix();
     glutSwapBuffers();
 }
 
@@ -114,6 +124,18 @@ void loadObj(const std::string& fileName)
 {
     Graph2D::ObjLoader loader{ fileName };
     polygon = loader.getResult();
+}
+
+void updateFOV(float w = static_cast<float>(glutGet(GLUT_WINDOW_WIDTH)), float h = static_cast<float>(glutGet(GLUT_WINDOW_HEIGHT)))
+{
+    GLfloat fAspect = w / h;
+
+    // Reset the coordinate system before modifying
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    // Set the clipping volume
+    gluPerspective(fov, fAspect, 0.1f, 100.0f);
 }
 
 void changeSize(int w, int h)
@@ -124,15 +146,7 @@ void changeSize(int w, int h)
         h = 1;
 
     glViewport(0, 0, w, h);
-
-    GLfloat fAspect = (GLfloat)w / (GLfloat)h;
-
-    // Reset the coordinate system before modifying
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    // Set the clipping volume
-    gluPerspective(35.0f, fAspect, 1.0f, 50.0f);
+    updateFOV(static_cast<float>(w), static_cast<float>(h));
 }
 
 void setupRC()
@@ -239,6 +253,20 @@ void handleKeyboardEvent(unsigned char key, int, int)
     }
 }
 
+void handleMouseWheelEvent(int wheel, int direction, int, int)
+{
+    if (wheel == 0)
+    {
+        // scroll down => -1, scroll up => +1
+        fov -= static_cast<float>(direction) * 10;
+
+        fov = std::min(std::max(fov, 10.0f), 170.0f);
+
+        updateFOV();
+        glutPostRedisplay();
+    }
+}
+
 int main(int argc, char* argv[])
 {
     if (argc > 1)
@@ -261,6 +289,7 @@ int main(int argc, char* argv[])
     glutReshapeFunc(changeSize);
     glutDisplayFunc(renderScene);
     glutKeyboardFunc(handleKeyboardEvent);
+    glutMouseWheelFunc(handleMouseWheelEvent);
 
     setupRC();
     buildPopupMenu();
